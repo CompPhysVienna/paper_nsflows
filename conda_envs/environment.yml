@@ -1,0 +1,35 @@
+# Portable environment for the nsflows package.
+#
+# Unlike conda_envs/spec-file_nsflows.txt (an explicit, linux-64-only spec that
+# reproduces the paper's environment byte-for-byte), this file lets conda solve
+# the dependency graph for the current platform. Use it to run the code on a
+# machine that is not linux-64, or when the pinned builds are no longer
+# available from the channels.
+#
+#   conda env create -f conda_envs/environment.yml
+#   conda activate nsflows
+#   pip install -e .
+#
+# By default this installs the CPU build of PyTorch. For the CUDA 11.8 build
+# used in the paper, uncomment the `pytorch-cuda` line below (linux-64/win-64
+# only) and make sure the `nvidia` channel stays enabled.
+
+name: nsflows
+
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python>=3.10,<3.13
+  - numpy>=1.26
+  - scipy>=1.12
+  - matplotlib>=3.8
+  - pytorch>=2.2
+  # - pytorch-cuda=11.8   # uncomment for the paper's GPU environment
+  - einops>=0.7
+  - tqdm>=4.66
+  - ipykernel>=6.29       # to run the notebooks
+  - pip
