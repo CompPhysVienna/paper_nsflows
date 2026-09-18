@@ -154,6 +154,10 @@ If you use this code, please cite:
 }
 ```
 
+## Contributors
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
 ## License
 
 See [LICENSE](LICENSE).
