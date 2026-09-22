@@ -108,18 +108,55 @@ plotting cells adapt to however many iterations completed.
 
 ### Provided data
 
-`data/dw/` holds the inputs the notebooks need, grouped by the number of live
-points `K`, zero-padded to five digits. Both notebooks pick the right directory
-from the `live_samples` parameter, so no path needs editing.
+`data/` holds the inputs the notebooks need. `data/dw/` covers the double well and
+`data/lj/` the Lennard-Jones disks. Both are grouped by the number of live points
+`K`, zero-padded to five digits, and `data/lj/` is grouped further by box length.
+The notebooks build these paths from `live_samples` and, for the Lennard-Jones
+case, from the selected density, so no path needs editing.
 
 | File | Purpose |
 |---|---|
 | `data/dw/K<K>/samples_init.pt` | Initial live set of `K` points, used to start a run so that every run begins from the same configuration |
 | `data/dw/K<K>/reference_from_std_ns.txt` | `output.txt` of a completed standard nested sampling run, used as the reference curve in the energy and density-of-states plots |
+| `data/lj/K<K>/L<L>/samples_init.pt` | As above, for the Lennard-Jones disks at box length `L` |
+| `data/lj/K<K>/L<L>/samples_ref.pt` | Deep live set of a completed run, used as the reference that configurations are aligned to before plotting |
+| `data/lj/K<K>/L<L>/reference_from_std_ns.txt.gz` | As the double-well reference above, compressed (see below). Provided for `L2.9` only |
 
-Sets are currently provided for `K = 1024` (`K01024`) and `K = 10000` (`K10000`).
-Setting `live_samples` to any other value raises a `FileNotFoundError` listing what
-is available, rather than silently starting from a mismatched configuration.
+For the double well, sets are provided for `K = 1024` (`K01024`) and `K = 10000`
+(`K10000`). For the Lennard-Jones disks, `K = 10000` at box lengths `2.9` and `3.3`,
+which are the densities 0.95 and 0.73 selected in the notebook. Asking for a value
+that is not provided raises a `FileNotFoundError` listing what is available, rather
+than silently starting from a mismatched configuration.
+
+The standard nested sampling reference is the one exception: it is provided for
+`L2.9` only. At `L3.3` the energy and density-of-states plots simply show the run
+itself, and the notebook says so rather than failing.
+
+#### The compressed reference
+
+The Lennard-Jones reference is one row per nested sampling iteration over half a
+million iterations, so it is shipped gzipped: 9.2 MB instead of 26 MB. The notebook
+reads it as it is; nothing below is needed to run the examples.
+
+NumPy reads it without unpacking anything:
+
+```python
+umax = np.loadtxt("data/lj/K10000/L2.9/reference_from_std_ns.txt.gz", usecols=3, unpack=True)
+```
+
+To unpack it anyway, for inspection or for tools that cannot read gzip:
+
+```bash
+# keep the archive
+gunzip -k data/lj/K10000/L2.9/reference_from_std_ns.txt.gz
+
+# or replace it with the plain file
+gunzip data/lj/K10000/L2.9/reference_from_std_ns.txt.gz
+```
+
+Both produce `reference_from_std_ns.txt`; the first keeps the archive next to it,
+the second removes it. `.gitignore` does not exclude the unpacked file, so delete it
+again before committing if you unpack in place.
 
 ## Package layout
 
