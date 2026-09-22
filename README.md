@@ -121,6 +121,7 @@ case, from the selected density, so no path needs editing.
 | `data/lj/K<K>/L<L>/samples_init.pt` | As above, for the Lennard-Jones disks at box length `L` |
 | `data/lj/K<K>/L<L>/samples_ref.pt` | Deep live set of a completed run, used as the reference that configurations are aligned to before plotting |
 | `data/lj/K<K>/L<L>/reference_from_std_ns.txt.gz` | As the double-well reference above, compressed (see below). Provided for `L2.9` only |
+| `data/lj/K10000/L2.9/live_sets/` | Live sets taken along a nested sampling run, the input to the conditioning and training scans |
 
 For the double well, sets are provided for `K = 1024` (`K01024`) and `K = 10000`
 (`K10000`). For the Lennard-Jones disks, `K = 10000` at box lengths `2.9` and `3.3`,
@@ -164,9 +165,28 @@ one row per scheduler. The pool size is not only documented here: it can be read
 back from column 6 of each run's `output.txt`, which records the number of
 configurations left in the pool.
 
-The remaining three folders, `xz_multiple_*_window_10K*`, are not nested sampling
-runs but the analyses of flow quality against the energy bound, giving the
-generation efficiency, the identity efficiency and the RESS.
+`data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind Figure 4:
+how well the flow performs as a function of the energy bound, as the generation
+efficiency, the identity efficiency and the RESS. The three folders correspond to
+the three curves, and each is produced by one of the notebooks below.
+
+| Folder | Produced by |
+|---|---|
+| `conditioning_window_10K` | `multiple_conditioning.ipynb` |
+| `training_window_10K` | `multiple_training.ipynb` with `collate_dataset = False` |
+| `training_window_10K_collated_dataset` | `multiple_training.ipynb` with `collate_dataset = True` |
+
+[`LJ-disks/multiple_conditioning.ipynb`](LJ-disks/multiple_conditioning.ipynb) and
+[`LJ-disks/multiple_training.ipynb`](LJ-disks/multiple_training.ipynb) train a flow
+on live sets taken at several points along a nested sampling run and measure how
+well it generates below the corresponding energy bound. They read the live sets
+from `data/lj/K10000/L2.9/live_sets/`, which holds the `samples_<iter>.pt` and
+`U_max_<iter>.pt` the two notebooks select.
+
+Running them with the parameters as shipped takes hours per live set. The trained
+networks are about 88 MB each and are not included, so the `train = False` branch,
+which re-evaluates a finished run instead of training, needs a run you produced
+yourself; only the resulting efficiency curves are provided here.
 
 The phase diagram in the left panel of Figure 7 is not produced from any of this
 data. It is adapted from Y.-W. Li, *Phase behavior of Lennard-Jones particles in
