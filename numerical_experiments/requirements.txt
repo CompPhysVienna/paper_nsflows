@@ -1,0 +1,14 @@
+# Extra dependencies for the numerical_experiments/ scripts, on top of the
+# repository's own requirements.txt / conda_envs (numpy, scipy, matplotlib,
+# torch, the local `nsflows` package). Also installable as the `numexp`
+# extra (`pip install -e .[numexp]`, see ../setup.py).
+#
+# Needed ONLY by the gravitational-wave scripts:
+#   probe_gw.py, hessian_spectrum.py, coupling_mi.py
+# bilby pulls in astropy/gwpy/etc. automatically; lalsuite provides the
+# lal + lalsimulation backend for the IMRPhenomPv2 waveform.
+bilby==2.8.2
+lalsuite==7.26.15
+
+# Tested combination:
+#   bilby 2.8.0, lal 7.7.1, lalsimulation 6.2.1

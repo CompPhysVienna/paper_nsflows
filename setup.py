@@ -14,5 +14,11 @@ setup(
         "einops>=0.7",
         "tqdm>=4.66",
     ],
+    extras_require={
+        "numexp": [
+            "bilby>=2.8",
+            "lalsuite>=7.0",
+        ],
+    },
     entry_points={},
 )
