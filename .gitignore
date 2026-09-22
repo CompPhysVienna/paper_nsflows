@@ -12,8 +12,9 @@ figures/
 *.h5
 *.log
 
-# ...but the small input data shipped with the repo is tracked
+# ...but the input data shipped with the repo is tracked
 !data/**/*.pt
+!data/**/*.npz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
