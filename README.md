@@ -132,6 +132,47 @@ The standard nested sampling reference is the one exception: it is provided for
 `L2.9` only. At `L3.3` the energy and density-of-states plots simply show the run
 itself, and the notebook says so rather than failing.
 
+#### Runs behind the paper figures
+
+`data/lj/K10000/L2.9/runs/` holds the runs that
+[`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb)
+reads. Only the files the figures need are included, not the full runs.
+
+Six of them are the nested sampling runs compared in Figure 5 of the paper, the
+time decomposition of successive pool generations, split into network training
+and pool generation. They all start from the same initial live
+set and run for the same number of nested sampling iterations, and differ only in
+the learning-rate schedule and the pool size. The folder name states all three:
+
+    <scheduler>_P<pool size>_<optimisation steps>os
+
+where the scheduler is One Cycle (`1C`), Cosine Annealing (`CA`), or the two
+combined (`1C-CA`, 1C applied every fifth epoch and CA for the rest, whose folder
+name gives the two step counts separately).
+
+| Folder | Scheduler | Optimisation steps | Pool size |
+|---|---|---|---|
+| `1C_P1e5_4500os` | 1C | 4500 | 10^5 |
+| `1C_P2e4_1000os` | 1C | 1000 | 2x10^4 |
+| `1C-CA_P1e5_3375-1125os` | 1C + CA | 3375 (1C) + 1125 (CA) | 10^5 |
+| `1C-CA_P2e4_750-250os` | 1C + CA | 750 (1C) + 250 (CA) | 2x10^4 |
+| `CA_P1e5_500os` | CA | 500 | 10^5 |
+| `CA_P2e4_250os` | CA | 250 | 2x10^4 |
+
+In Figure 5 the 10^5 runs are the left column and the 2x10^4 runs the right,
+one row per scheduler. The pool size is not only documented here: it can be read
+back from column 6 of each run's `output.txt`, which records the number of
+configurations left in the pool.
+
+The remaining three folders, `xz_multiple_*_window_10K*`, are not nested sampling
+runs but the analyses of flow quality against the energy bound, giving the
+generation efficiency, the identity efficiency and the RESS.
+
+The phase diagram in the left panel of Figure 7 is not produced from any of this
+data. It is adapted from Y.-W. Li, *Phase behavior of Lennard-Jones particles in
+two dimensions*, Physical Review E (2020); only the configuration in the right
+panel comes from this work.
+
 #### The compressed reference
 
 The Lennard-Jones reference is one row per nested sampling iteration over half a
