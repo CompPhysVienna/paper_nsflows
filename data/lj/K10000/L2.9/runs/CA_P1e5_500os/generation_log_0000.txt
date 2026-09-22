@@ -1,0 +1,20 @@
+# Generation 0
+
+0 0.07774
+1 0.15482
+2 0.23567
+3 0.31551
+4 0.40472
+5 0.48208
+6 0.56428
+7 0.64216
+8 0.72257
+9 0.80256
+10 0.89
+11 0.97036
+12 1.05779
+# Generated pool n. 0 for Umax = 2496.216796875
+# Generated a pool of 100000 with an acceptance of 0.40684230769230767
+# Generation repeated 13 times
+# Average relative effective sample size: 0.8794516921043396
+# Generation efficiency: 0.07692307692307693
