@@ -1,7 +1,6 @@
-# paper_nsflows
+# Generative Nested Sampling of Atomistic Thermodynamic Landscapes
 
-Companion repository for the paper *"Generative Nested Sampling of Atomistic
-Thermodynamic Landscapes"* (NSFlows),
+Companion repository for the paper of that name (NSFlows),
 [arXiv:2609.03193](https://arxiv.org/abs/2609.03193).
 
 This repository contains `nsflows`, the Python package used to produce all
