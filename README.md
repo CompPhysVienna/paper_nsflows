@@ -8,6 +8,19 @@ This repository contains `nsflows`, the Python package used to produce all
 results reported in the paper: a nested sampling implementation in which the
 constrained-prior sampling step is performed by a normalizing flow.
 
+## Which code makes which figure
+
+| Figure | Produced by |
+|---|---|
+| 1 | [`numerical_experiments/make_fig_landscapes.py`](numerical_experiments/make_fig_landscapes.py) |
+| 2, 3, 4, 5, 7 | [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) |
+| 6 | [`numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py`](numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py) |
+| 8 | [`numerical_experiments/make_fig_concepts_internal_complexity.py`](numerical_experiments/make_fig_concepts_internal_complexity.py) |
+
+All of them read data included here, so every figure rebuilds from a fresh clone
+without re-running any simulation. The runs behind Figures 4 and 5 can also be
+reproduced, see [Examples](#examples) below.
+
 ## Requirements
 
 - Python >= 3.10
@@ -80,6 +93,8 @@ python -c "import nsflows.nested_sampling, nsflows.network.trainer; print('ok')"
 
 ## Examples
 
+### Two-dimensional double well
+
 The `2D-testsystems/` directory contains two notebooks that run nested sampling on
 the same system: a single particle in a two-dimensional double well, defined in
 `nsflows.systems.testsystems_2D`. They are the smallest complete demonstration of
@@ -95,16 +110,38 @@ top, so that is the only place you need to edit to change a run. The flow is
 controlled entirely by `turn_on_nf`: it is the iteration at which the flow takes
 over, and a negative value disables it, which is what `std_ns.ipynb` uses.
 
-Each run creates its own directory under `2D-testsystems/output/<run-id>/` and
+### Lennard-Jones disks
+
+`LJ-disks/` runs the same method on eight Lennard-Jones disks in two dimensions,
+the system the paper's results are for. The two state points are selected by the
+`density` parameter, 0.95 and 0.73, which fixes the box length and the input data.
+
+| Notebook | What it does |
+|---|---|
+| [`LJ-disks/std_ns.ipynb`](LJ-disks/std_ns.ipynb) | Standard nested sampling, the baseline |
+| [`LJ-disks/nsflows.ipynb`](LJ-disks/nsflows.ipynb) | Nested sampling with the flow |
+| [`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) | Flow efficiency against the energy bound, conditioned on it |
+| [`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) | The same, retraining at each live set instead |
+| [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) | Figures 2, 3, 4, 5 and 7, from the data included here |
+
+Only the last one is quick. The other four are full runs: the flow-based nested
+sampling took between 8 and 32 hours per run on a GPU, and the two efficiency
+scans take hours per live set. Reduce `max_ns_iterations`, or `live_sets` and
+`total_steps`, to see them work before committing to a full run.
+
+### Output of a run
+
+Each run creates its own directory under `<system>/output/<run-id>/` and
 writes there as it goes:
 
 - `output.txt`, one row per iteration: iteration, live points, acceptance, energy bound, index of the replaced walker
 - `samples_<iter>.pt` and `U_max_<iter>.pt`, snapshots of the live set and the energy bound every `isavesamp` iterations
 - `timings.txt`, wall-clock time split across sampling, flow sampling, training and pool generation
 
-These directories are not tracked by git. A run interrupted with `Ctrl-C` still
-returns its history and writes `timings.txt`, so a partial run is usable: the
-plotting cells adapt to however many iterations completed.
+Each run also writes `simulation_summary.txt` and `.json` recording the parameters
+it was started with. These directories are not tracked by git. A run interrupted
+with `Ctrl-C` still returns its history and writes `timings.txt`, so a partial run
+is usable: the plotting cells adapt to however many iterations completed.
 
 ### Provided data
 
@@ -218,6 +255,28 @@ gunzip data/lj/K10000/L2.9/reference_from_std_ns.txt.gz
 Both produce `reference_from_std_ns.txt`; the first keeps the archive next to it,
 the second removes it. `.gitignore` does not exclude the unpacked file, so delete it
 again before committing if you unpack in place.
+
+### Numerical experiments
+
+`numerical_experiments/` holds the scripts for the three figures that are not
+produced by the notebooks. Run them directly; each writes a PDF and a PNG into
+`numerical_experiments/figures/`.
+
+| Script | Figure | Reads |
+|---|---|---|
+| `make_fig_landscapes.py` | 1 | `coupling_mi.npz`, `gw_degeneracies.npz`, `hessian_spectra.npz`, `lj_symmetries.npz` |
+| `make_fig_internal_complexity_two_density_efficiency.py` | 6 | `internal_complexity_L2.9.npz`, `internal_complexity_L3.3.npz` |
+| `make_fig_concepts_internal_complexity.py` | 8 | nothing, it is self-contained |
+
+```bash
+cd numerical_experiments
+python make_fig_landscapes.py
+```
+
+Their inputs are in `data/numerical_experiments/`, as the `.npz` files produced
+by the analyses behind those figures. The scripts that generate those `.npz` are
+not included here yet; the precomputed data lets the three figures be rebuilt
+without them.
 
 ## Package layout
 
