@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: "nsflows: generative nested sampling of atomistic thermodynamic landscapes"
+message: "If you use this software, please cite the paper it accompanies."
+type: software
+authors:
+  - given-names: Alessandro
+    family-names: Coretti
+    alias: corettialessandro
+  - given-names: Nico
+    family-names: Unglert
+    alias: nunglert
+repository-code: "https://github.com/CompPhysVienna/paper_nsflows"
+license: MIT
+preferred-citation:
+  type: article
+  title: "Generative Nested Sampling of Atomistic Thermodynamic Landscapes"
+  authors:
+    - given-names: Alessandro
+      family-names: Coretti
+    - given-names: Nico
+      family-names: Unglert
+    - given-names: Sebastian
+      family-names: Falkner
+    - given-names: Georg K. H.
+      family-names: Madsen
+    - given-names: Christoph
+      family-names: Dellago
+  year: 2026
+  journal: "arXiv preprint"
+  identifiers:
+    - type: other
+      value: "arXiv:2609.03193"
+      description: arXiv identifier
+  url: "https://arxiv.org/abs/2609.03193"
