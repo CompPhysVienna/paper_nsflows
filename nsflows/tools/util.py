@@ -303,3 +303,233 @@ def generate_output_directory(run_id, root_folder="./output"):
         print(f"Generated output directory: {output_dir}")
     
     return output_dir
+
+
+def box_length_from_density(rho, n_particles, dimensions):
+    """
+    Compute the side length of a square/cubic box from density.
+
+    Parameters
+    ----------
+    rho : float
+        Number density (N/V).
+    n_particles : int
+        Number of particles.
+    dimensions : int
+        Number of spatial dimensions.
+
+    Returns
+    -------
+    L : float
+        Box side length.
+    """
+
+    volume = n_particles / rho
+    L = volume ** (1.0 / dimensions)
+
+    return L
+
+
+def density_from_box_length(L, n_particles, dimensions):
+    """
+    Compute number density from box side length.
+
+    Parameters
+    ----------
+    L : float
+        Box side length.
+    n_particles : int
+        Number of particles.
+    dimensions : int
+        Number of spatial dimensions.
+
+    Returns
+    -------
+    rho : float
+        Number density (N/V).
+    """
+
+    volume = L ** dimensions
+    rho = n_particles / volume
+
+    return rho
+
+
+def remove_outermost_particle(xp):
+    """
+    Drop the particle farthest from the origin in each configuration.
+
+    Parameters
+    ----------
+    xp : torch.Tensor
+        (B, N, D) configurations in internal coordinates.
+
+    Returns
+    -------
+    xp_trimmed : torch.Tensor
+        (B, N-1, D) configurations with the outermost particle removed.
+    """
+
+    # distance from center
+    r2 = torch.sum(xp**2, dim=-1)
+
+    # find farthest particle per batch
+    far_idx = torch.argmax(r2, dim=1)
+
+    B, N, D = xp.shape
+    mask = torch.ones((B, N), dtype=torch.bool, device=xp.device)
+    mask[torch.arange(B), far_idx] = False
+
+    xp_trimmed = xp[mask].view(B, N-1, D)
+
+    return xp_trimmed
+
+
+def identity_transform(x):
+
+    return x
+
+
+def rotate_pi2_transform(x):
+
+    y = x.clone()
+    x0 = y[..., 0].clone()
+    y[..., 0] = -y[..., 1]
+    y[..., 1] = x0
+
+    return y
+
+
+def align_rot90_hungarian(x, x_ref, n_particles, dimensions, box_length=None):
+    """
+    For each configuration, decide whether the identity or a pi/2 rotation brings
+    it closest to the reference, after optimally permuting particle labels.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        (B, N, 2) configurations to align.
+    x_ref : torch.Tensor
+        (B, N, 2) or (1, N, 2) reference configuration.
+    n_particles : int
+        Number of particles in x, i.e. N.
+    dimensions : int
+        Number of spatial dimensions.
+    box_length : float or None
+        If given, distances use the minimum image convention with this box length.
+
+    Returns
+    -------
+    best_sym : torch.Tensor
+        (B,) index of the best transform, 0 for identity and 1 for the rotation.
+    """
+
+    B = x.shape[0]
+
+    transforms = [identity_transform, rotate_pi2_transform]
+
+    best_cost = torch.full((B,), float("inf"), device=x.device)
+    best_sym = torch.zeros(B, dtype=torch.long, device=x.device)
+
+    for s in range(2):
+
+        x_s = transforms[s](x)
+
+        cost_matrix = dist_matrix(
+            x_s,
+            x_ref,
+            n_particles,
+            dimensions,
+            box_length
+        )
+
+        # hungarian_algorithm returns a flattened (B, N*D) tensor
+        x_perm = hungarian_algorithm(
+            x_s,
+            cost_matrix,
+            n_particles,
+            dimensions
+        ).reshape(B, n_particles, dimensions)
+
+        cost = torch.mean((x_perm - x_ref) ** 2, dim=(1, 2))
+
+        mask = cost < best_cost
+
+        best_cost[mask] = cost[mask]
+        best_sym[mask] = s
+
+    return best_sym
+
+
+def apply_rot90_symmetry_batched(x, sym):
+    """
+    Apply the pi/2 rotation to the configurations flagged by `sym`.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        (B, N, 2) configurations.
+    sym : torch.Tensor
+        (B,) as returned by align_rot90_hungarian.
+
+    Returns
+    -------
+    x_out : torch.Tensor
+        (B, N, 2) configurations with the rotation applied where sym == 1.
+    """
+
+    x_out = x.clone()
+
+    mask = sym == 1
+
+    if mask.any():
+        x0 = x_out[mask, :, 0].clone()
+        x_out[mask, :, 0] = -x_out[mask, :, 1]
+        x_out[mask, :, 1] = x0
+
+    return x_out
+
+
+def align_config(config, ref_config, n_particles, dimensions, box_length=None):
+    """
+    Align configurations to a reference up to a pi/2 rotation and a relabelling
+    of the particles. The outermost particle is dropped before the comparison,
+    so that the reference only has to fix the inner ones, but the rotation is
+    then applied to the full configuration.
+
+    Parameters
+    ----------
+    config : torch.Tensor
+        (B, N, 2) configurations to align.
+    ref_config : torch.Tensor
+        (B, N-1, 2) or (1, N-1, 2) reference, with its outermost particle
+        already removed.
+    n_particles : int
+        Number of particles in config, i.e. N.
+    dimensions : int
+        Number of spatial dimensions.
+    box_length : float or None
+        If given, distances use the minimum image convention with this box length.
+
+    Returns
+    -------
+    aligned_config : torch.Tensor
+        (B, N, 2) aligned configurations.
+    """
+
+    # remove outermost particle
+    red_config = remove_outermost_particle(config)
+
+    # compute symmetry (identity or pi/2)
+    symm = align_rot90_hungarian(
+        red_config,
+        ref_config,
+        n_particles-1,
+        dimensions,
+        box_length=box_length
+    )
+
+    # apply symmetry to the FULL configuration
+    aligned_config = apply_rot90_symmetry_batched(config, symm)
+
+    return aligned_config
