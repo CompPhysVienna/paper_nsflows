@@ -172,12 +172,12 @@ the three curves, and each is produced by one of the notebooks below.
 
 | Folder | Produced by |
 |---|---|
-| `conditioning_window_10K` | `multiple_conditioning.ipynb` |
-| `training_window_10K` | `multiple_training.ipynb` with `collate_dataset = False` |
-| `training_window_10K_collated_dataset` | `multiple_training.ipynb` with `collate_dataset = True` |
+| `conditioning_window_10K` | `multiple_live_sets_conditioning.ipynb` |
+| `training_window_10K` | `multiple_live_sets_training.ipynb` with `collate_dataset = False` |
+| `training_window_10K_collated_dataset` | `multiple_live_sets_training.ipynb` with `collate_dataset = True` |
 
-[`LJ-disks/multiple_conditioning.ipynb`](LJ-disks/multiple_conditioning.ipynb) and
-[`LJ-disks/multiple_training.ipynb`](LJ-disks/multiple_training.ipynb) train a flow
+[`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) and
+[`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) train a flow
 on live sets taken at several points along a nested sampling run and measure how
 well it generates below the corresponding energy bound. They read the live sets
 from `data/lj/K10000/L2.9/live_sets/`, which holds the `samples_<iter>.pt` and
