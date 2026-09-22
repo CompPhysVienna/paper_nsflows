@@ -235,8 +235,6 @@ def main() -> None:
     parser.add_argument("--gw-eps", type=float, default=2e-3)
     parser.add_argument("--output-npz", type=str,
                         default=str(Path(__file__).parent / "output" / "hessian_spectra.npz"))
-    parser.add_argument("--output-png", type=str,
-                        default=str(Path(__file__).parent / "output" / "hessian_spectra.png"))
     args = parser.parse_args()
 
     print("Computing LJ Hessian at IS#0 (torch autograd, exact)...", flush=True)
@@ -285,82 +283,7 @@ def main() -> None:
         param_names=np.array(SAMPLED_PARAMS),
     )
     print(f"Wrote {args.output_npz}")
-
     # ---- plot ----
-    fig, axes = plt.subplots(2, 2, figsize=(13, 10))
-
-    # (0, 0): eigenvalue spectra
-    ax = axes[0, 0]
-    ax.semilogy(np.arange(eigs_lj.size),
-                np.sort(np.abs(eigs_lj))[::-1], "o-",
-                label=f"LJ-8 (cond$_\\mathrm{{eff}}$ {stats_lj['cond']:.1e})",
-                color="C0")
-    ax.semilogy(np.arange(eigs_gw.size),
-                np.sort(np.abs(eigs_gw))[::-1], "s-",
-                label=f"GW BBH (cond$_\\mathrm{{eff}}$ {stats_gw['cond']:.1e})",
-                color="C3")
-    ax.set_xlabel("eigenvalue index (sorted, largest first)")
-    ax.set_ylabel(r"$|\lambda|$  (log scale)")
-    ax.set_title("A. Eigenvalue spectra of local Hessian")
-    ax.legend(loc="upper right", fontsize=9)
-    ax.grid(True, which="both", alpha=0.3)
-
-    # (0, 1): participation ratios per mode
-    ax = axes[0, 1]
-    n_lj_kept = stats_lj["participation_ratios"].size
-    n_gw_kept = stats_gw["participation_ratios"].size
-    # sort modes by eigenvalue (largest first) for x-axis alignment
-    abs_eigs_lj = np.abs(eigs_lj)
-    abs_eigs_gw = np.abs(eigs_gw)
-    keep_lj = abs_eigs_lj > 1e-6 * abs_eigs_lj.max()
-    keep_gw = abs_eigs_gw > 1e-6 * abs_eigs_gw.max()
-    order_lj = np.argsort(abs_eigs_lj[keep_lj])[::-1]
-    order_gw = np.argsort(abs_eigs_gw[keep_gw])[::-1]
-    P_lj = stats_lj["participation_ratios"][order_lj]
-    P_gw = stats_gw["participation_ratios"][order_gw]
-    ax.plot(np.arange(P_lj.size), P_lj, "o-",
-            label=f"LJ-8 (mean P = {P_lj.mean():.1f} / {eigs_lj.size} DOF)",
-            color="C0")
-    ax.plot(np.arange(P_gw.size), P_gw, "s-",
-            label=f"GW BBH (mean P = {P_gw.mean():.1f} / {eigs_gw.size} DOF)",
-            color="C3")
-    ax.axhline(1.0, color="k", lw=0.5, ls=":", label="P=1: localised (axis-aligned)")
-    ax.set_xlabel("mode index (largest |λ| first)")
-    ax.set_ylabel("participation ratio P")
-    ax.set_title("B. How collective is each mode?  "
-                 "P=N is fully delocalised, P=1 is axis-aligned")
-    ax.legend(loc="upper right", fontsize=9)
-    ax.grid(True, alpha=0.3)
-
-    # (1, 0): LJ Hessian heatmap (normalised by max |λ|)
-    ax = axes[1, 0]
-    H_lj_norm = H_lj / abs_eigs_lj.max()
-    im = ax.imshow(H_lj_norm, cmap="RdBu_r", vmin=-0.5, vmax=0.5)
-    ax.set_title(f"C. LJ Hessian (normalised by max |λ| = "
-                 f"{abs_eigs_lj.max():.2e})")
-    ax.set_xlabel("DOF index"); ax.set_ylabel("DOF index")
-    fig.colorbar(im, ax=ax, label=r"$H_{ij}/\max|\lambda|$")
-
-    # (1, 1): GW Hessian heatmap (normalised by max |λ|)
-    ax = axes[1, 1]
-    H_gw_norm = H_gw / abs_eigs_gw.max()
-    im = ax.imshow(H_gw_norm, cmap="RdBu_r", vmin=-0.5, vmax=0.5)
-    ax.set_title(f"D. GW Hessian (normalised by max |λ| = "
-                 f"{abs_eigs_gw.max():.2e})")
-    ax.set_xticks(range(len(SAMPLED_PARAMS)))
-    ax.set_xticklabels(SAMPLED_PARAMS, rotation=70, fontsize=7)
-    ax.set_yticks(range(len(SAMPLED_PARAMS)))
-    ax.set_yticklabels(SAMPLED_PARAMS, fontsize=7)
-    fig.colorbar(im, ax=ax, label=r"$H_{ij}/\max|\lambda|$")
-
-    fig.suptitle(
-        "Local geometry at the posterior peak — LJ-8 vs GW BBH",
-        fontsize=12,
-    )
-    fig.tight_layout()
-    fig.savefig(args.output_png, dpi=140)
-    print(f"Wrote {args.output_png}")
-
 
 if __name__ == "__main__":
     sys.exit(main())

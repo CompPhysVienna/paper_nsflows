@@ -21,7 +21,7 @@ The story: GW degeneracies are smooth continuous ridges with coupling
 discrete + combinatorial (hard collision walls between permutation
 copies) with coupling *diffuse* across all coordinates.
 
-Data sources (read-only), all under ./output/:
+Data sources (read-only; see --data-dir, default ../data/numerical_experiments/):
   gw_degeneracies.npz   (probe_gw.py)
   lj_symmetries.npz     (probe_lj.py)
   hessian_spectra.npz   (hessian_spectrum.py)
@@ -29,6 +29,7 @@ Data sources (read-only), all under ./output/:
 """
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -40,9 +41,7 @@ from matplotlib.ticker import MaxNLocator
 from nsflows.tools import plotstyle as ps
 
 HERE = Path(__file__).parent
-OUT = HERE.parent / "data" / "numerical_experiments"
-SYM = OUT      # gw_degeneracies.npz, lj_symmetries.npz
-TC = OUT       # hessian_spectra.npz, coupling_mi.npz
+DEFAULT_DATA_DIR = HERE.parent / "data" / "numerical_experiments"
 MEDIA_DIR = HERE / "figures"
 MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -110,10 +109,21 @@ def mask_diagonal_blocks(M, block):
 
 
 def main() -> None:
-    gw = dict(np.load(SYM / "gw_degeneracies.npz", allow_pickle=True))
-    lj = dict(np.load(SYM / "lj_symmetries.npz", allow_pickle=True))
-    hs = dict(np.load(TC / "hessian_spectra.npz", allow_pickle=True))
-    mi = dict(np.load(TC / "coupling_mi.npz", allow_pickle=True))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data-dir", type=Path, default=DEFAULT_DATA_DIR,
+        help="directory containing gw_degeneracies.npz, lj_symmetries.npz, "
+             "hessian_spectra.npz and coupling_mi.npz (default: the shipped "
+             f"{DEFAULT_DATA_DIR}; pass generate_data/output/ to plot from "
+             "freshly regenerated data)",
+    )
+    args = parser.parse_args()
+    data_dir = args.data_dir
+
+    gw = dict(np.load(data_dir / "gw_degeneracies.npz", allow_pickle=True))
+    lj = dict(np.load(data_dir / "lj_symmetries.npz", allow_pickle=True))
+    hs = dict(np.load(data_dir / "hessian_spectra.npz", allow_pickle=True))
+    mi = dict(np.load(data_dir / "coupling_mi.npz", allow_pickle=True))
 
     # Same full-page recipe as the notebook figures: canvas targets
     # \linewidth under the shared PRINT_SCALE (aspect kept from the

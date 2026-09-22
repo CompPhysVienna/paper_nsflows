@@ -242,8 +242,6 @@ def main() -> None:
                              "direction.")
     parser.add_argument("--output-npz", type=str,
                         default=str(Path(__file__).parent / "output" / "coupling_mi.npz"))
-    parser.add_argument("--output-png", type=str,
-                        default=str(Path(__file__).parent / "output" / "coupling_mi.png"))
     args = parser.parse_args()
 
     H_path = Path(args.hessian_npz)
@@ -347,88 +345,6 @@ def main() -> None:
         param_names_gw=np.array(SAMPLED_PARAMS),
     )
     print(f"Wrote {args.output_npz}")
-
-    # ---- plot ----
-    fig = plt.figure(figsize=(15, 10))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1, 0.7])
-
-    # Use per-system color scale so both block-structure and diffuse-haze
-    # are visible — a shared scale would saturate one and wash out the
-    # other.
-    M = NMI_lj.copy()
-    np.fill_diagonal(M, np.nan)
-    ax = fig.add_subplot(gs[0, 0])
-    vmax_lj = np.nanmax(M)
-    im = ax.imshow(M, cmap="viridis", vmin=0, vmax=vmax_lj)
-    ax.set_title(
-        f"A. LJ-8: pairwise NMI  (per-system scale; max NMI = {vmax_lj:.3f})\n"
-        f"mean off-diag NMI = {mean_nmi_lj:.3f}; top 5% pairs carry "
-        f"{conc_lj*100:.0f}% of total MI mass; median fanout = {int(np.median(fan_lj))}/{d_lj-1}"
-    )
-    coord_labels = [f"p{i//2}_{'xy'[i%2]}" for i in range(d_lj)]
-    ax.set_xticks(range(d_lj))
-    ax.set_xticklabels(coord_labels, rotation=70, fontsize=7)
-    ax.set_yticks(range(d_lj))
-    ax.set_yticklabels(coord_labels, fontsize=7)
-    fig.colorbar(im, ax=ax, label="NMI")
-
-    ax = fig.add_subplot(gs[0, 1])
-    M = NMI_gw.copy()
-    np.fill_diagonal(M, np.nan)
-    vmax_gw = np.nanmax(M)
-    im = ax.imshow(M, cmap="viridis", vmin=0, vmax=vmax_gw)
-    ax.set_title(
-        f"B. GW BBH: pairwise NMI  (per-system scale; max NMI = {vmax_gw:.3f})\n"
-        f"mean off-diag NMI = {mean_nmi_gw:.3f}; top 5% pairs carry "
-        f"{conc_gw*100:.0f}% of total MI mass; median fanout = {int(np.median(fan_gw))}/{d_gw-1}"
-    )
-    ax.set_xticks(range(d_gw))
-    ax.set_xticklabels(SAMPLED_PARAMS, rotation=70, fontsize=7)
-    ax.set_yticks(range(d_gw))
-    ax.set_yticklabels(SAMPLED_PARAMS, fontsize=7)
-    fig.colorbar(im, ax=ax, label="NMI")
-
-    # Bottom row: distribution of off-diagonal NMI values and per-coord
-    # fanout histogram.
-    ax = fig.add_subplot(gs[1, 0])
-    ax.hist(off_nmi_lj, bins=40,
-            alpha=0.5, label=f"LJ ({d_lj*(d_lj-1)//2} pairs)", color="C0")
-    ax.hist(off_nmi_gw, bins=40,
-            alpha=0.5, label=f"GW ({d_gw*(d_gw-1)//2} pairs)", color="C3")
-    ax.set_xlabel("off-diagonal NMI")
-    ax.set_ylabel("number of pairs")
-    ax.set_yscale("log")
-    ax.set_title("C. Distribution of off-diagonal NMI values\n"
-                 "LJ: narrow distribution near 0 (everything weakly "
-                 "coupled);  GW: heavy tail (few strong couplings)")
-    ax.legend(loc="upper right", fontsize=9)
-    ax.grid(True, alpha=0.3)
-
-    ax = fig.add_subplot(gs[1, 1])
-    bins = np.arange(-0.5, max(fan_lj.max(), fan_gw.max()) + 1.5)
-    ax.hist(fan_lj, bins=bins, alpha=0.5,
-            label=f"LJ (16 coords)", color="C0")
-    ax.hist(fan_gw, bins=bins, alpha=0.5,
-            label=f"GW (15 coords)", color="C3")
-    ax.set_xlabel("per-coordinate fanout "
-                  "(# of other coords with NMI > 10% of max)")
-    ax.set_ylabel("number of coords")
-    ax.set_title("D. Per-coordinate fanout — how many other coords does "
-                 "each one strongly couple to?\n"
-                 "LJ: each coord couples to many others (diffuse);  "
-                 "GW: each couples to ≤ a handful (block structure)")
-    ax.legend(loc="upper right", fontsize=9)
-    ax.grid(True, alpha=0.3)
-
-    fig.suptitle(
-        "Coordinate coupling at the posterior peak — LJ vs GW "
-        "(Laplace samples)",
-        fontsize=12,
-    )
-    fig.tight_layout()
-    fig.savefig(args.output_png, dpi=140)
-    print(f"Wrote {args.output_png}")
-
 
 if __name__ == "__main__":
     sys.exit(main())

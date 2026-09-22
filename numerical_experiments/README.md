@@ -5,13 +5,15 @@ by the `2D-testsystems/` or `LJ-disks/` notebooks), together with the
 data-generation scripts that produced the `.npz` files shipped in
 `../data/numerical_experiments/`.
 
-Figure scripts (`make_fig_*.py`, here in `numerical_experiments/`) read
-their input `.npz` from `../data/numerical_experiments/` and write PDF +
-PNG into `./figures/` (gitignored). Data-generation scripts (in
-`generate_data/`) read and write `.npz`/diagnostic PNGs under `generate_data/output/`
-(gitignored); the committed copies in `../data/numerical_experiments/` are
-what the figure scripts actually use, so a regenerated `.npz` has to be
-copied over manually if you want a figure rebuilt from fresh data.
+Figure scripts (`make_fig_*.py`, here in `numerical_experiments/`) write PDF
++ PNG into `./figures/` (gitignored). By default `make_fig_landscapes.py`
+and `make_fig_internal_complexity_two_density_efficiency.py` (the two that
+need input data) read their `.npz` from the committed
+`../data/numerical_experiments/`; pass `--data-dir` to point them at
+freshly regenerated data instead — e.g. `--data-dir generate_data/output`,
+what `run_all.sh` does after regenerating everything. Data-generation
+scripts (in `generate_data/`) read and write `.npz`/diagnostic PNGs under
+`generate_data/output/` (gitignored).
 
 ## Layout
 
@@ -68,11 +70,20 @@ python make_fig_internal_complexity_two_density_efficiency.py
 python make_fig_concepts_internal_complexity.py
 ```
 
-Regenerate the data too (writes into `generate_data/output/`, see the layout note
-above about copying results into `../data/numerical_experiments/`):
+Regenerate the data and rebuild the figures from it in one go (writes data
+into `generate_data/output/`, then calls the figure scripts with
+`--data-dir generate_data/output` so they plot the fresh data rather than
+the committed copies):
 
 ```bash
 ./run_all.sh
+```
+
+To rebuild a single figure from freshly regenerated data without running
+everything:
+
+```bash
+python make_fig_landscapes.py --data-dir generate_data/output
 ```
 
 ## Data-flow / run order
