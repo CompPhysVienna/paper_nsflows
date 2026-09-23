@@ -81,6 +81,13 @@ pip install -e .
 For a GPU build of PyTorch, install it from the appropriate PyTorch index
 before running the command above; see https://pytorch.org/get-started/locally/.
 
+Only needed to run the gravitational-wave scripts in `numerical_experiments/`
+(see below), the `numexp` extra pulls in `bilby` and `lalsuite`:
+
+```bash
+pip install -e .[numexp]
+```
+
 ### Checking the installation
 
 `nsflows/__init__.py` is empty, so a bare `import nsflows` succeeds even if the
@@ -273,9 +280,17 @@ python make_fig_landscapes.py
 ```
 
 Their inputs are in `data/numerical_experiments/`, as the `.npz` files produced
-by the analyses behind those figures. The scripts that generate those `.npz` are
-not included here yet; the precomputed data lets the three figures be rebuilt
-without them.
+by the analyses behind those figures. The scripts that generate those `.npz`
+(`numerical_experiments/generate_data/bh_lj.py`, `probe_lj.py`,
+`internal_complexity.py`, `hessian_spectrum.py`, `coupling_mi.py` and
+`probe_gw.py`) are also included, together with `run_all.sh`, which
+regenerates everything in dependency order; see
+[`numerical_experiments/README.md`](numerical_experiments/README.md) for the full
+layout and data-flow. The gravitational-wave scripts need `bilby` and `lalsuite`,
+installed via the `numexp` extra (`pip install -e .[numexp]`) or from the pinned
+`numerical_experiments/requirements.txt`, and `internal_complexity.py` needs raw
+nested-sampling run directories that are not bundled here, so the precomputed
+`.npz` ship instead and the figure rebuilds without it.
 
 ## Package layout
 

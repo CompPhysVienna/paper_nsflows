@@ -72,8 +72,7 @@ def panel_label(ax, text):
 # scale-mixture are captured when integrating the 2nd/4th moments.
 Z = np.linspace(-30.0, 30.0, 24001)
 PHI = np.exp(-Z ** 2 / 2) / np.sqrt(2 * np.pi)
-_trap = getattr(np, "trapezoid", np.trapz)
-
+_trap = np.trapezoid
 
 def _gauss(z, mu, var):
     return np.exp(-(z - mu) ** 2 / (2 * var)) / np.sqrt(2 * np.pi * var)

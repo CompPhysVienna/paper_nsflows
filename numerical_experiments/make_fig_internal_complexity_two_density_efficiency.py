@@ -17,6 +17,7 @@ Extras vs. the attempts figure:
 """
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib as mpl
@@ -27,7 +28,7 @@ from matplotlib.ticker import FixedLocator, FuncFormatter
 from nsflows.tools import plotstyle as ps
 
 HERE = Path(__file__).parent
-OUT = HERE.parent / "data" / "numerical_experiments"
+DEFAULT_DATA_DIR = HERE.parent / "data" / "numerical_experiments"
 MEDIA_DIR = HERE / "figures"
 MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -132,8 +133,19 @@ def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
 
 
 def main() -> None:
-    l29 = dict(np.load(OUT / "internal_complexity_L2.9.npz"))
-    l33 = dict(np.load(OUT / "internal_complexity_L3.3.npz"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data-dir", type=Path, default=DEFAULT_DATA_DIR,
+        help="directory containing internal_complexity_L2.9.npz and "
+             "internal_complexity_L3.3.npz (default: the shipped "
+             f"{DEFAULT_DATA_DIR}; pass generate_data/output/ to plot from "
+             "freshly regenerated data)",
+    )
+    args = parser.parse_args()
+    data_dir = args.data_dir
+
+    l29 = dict(np.load(data_dir / "internal_complexity_L2.9.npz"))
+    l33 = dict(np.load(data_dir / "internal_complexity_L3.3.npz"))
 
     # Same full-page recipe as the notebook figures: canvas targets
     # \linewidth under the shared PRINT_SCALE (aspect kept from the

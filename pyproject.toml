@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nsflows"
+version = "0.1.0"
+description = "Generative nested sampling of atomistic thermodynamic landscapes with normalizing flows"
+authors = [
+    {name = "Alessandro Coretti"},
+    {name = "Nico Unglert"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.12",
+    "torch>=2.2",
+    "matplotlib>=3.8",
+    "einops>=0.7",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+numexp = [
+    "bilby>=2.8",
+    "lalsuite>=7.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
