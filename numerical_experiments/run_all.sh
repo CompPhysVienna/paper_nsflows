@@ -31,9 +31,8 @@ run generate_data/coupling_mi.py           # reads hessian_spectra.npz -> genera
 run generate_data/probe_gw.py              # -> generate_data/output/gw_degeneracies.npz
 run generate_data/probe_lj.py              # -> generate_data/output/lj_symmetries.npz
 
-###################  AC pls fix paths to generation logs (zip)   ##############
-# run generate_data/internal_complexity.py 
-###################  AC pls fix paths to generation logs (zip)   ##############
+# Reads the trimmed NS runs bundled in ../data/numerical_experiments/runs/
+run generate_data/internal_complexity.py   # -> generate_data/output/internal_complexity_{L2.9,L3.3}.npz
 
 # --- figures (--data-dir points at the just-regenerated data, not the
 #              committed copies in ../data/numerical_experiments/; write to
@@ -41,9 +40,7 @@ run generate_data/probe_lj.py              # -> generate_data/output/lj_symmetri
 run make_fig_landscapes.py --data-dir generate_data/output   # Figure 1
 run make_fig_concepts_internal_complexity.py             # Figure 8 (self-contained)
 
-############  can get --data-dir flag once issue above is fixed   #############
-run make_fig_internal_complexity_two_density_efficiency.py  # Figure 6
-############  can get --data-dir flag once issue above is fixed   #############
+run make_fig_internal_complexity_two_density_efficiency.py --data-dir generate_data/output  # Figure 6
 
 
 echo; echo "Done. See generate_data/output/ for regenerated .npz data and ./figures/ for the figures."

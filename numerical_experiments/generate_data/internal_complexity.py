@@ -16,14 +16,23 @@ The first N_CUM-1 events have a partial cumulation window (Mcum un-pooled,
 drift undefined) and are flagged via 'valid'.
 
 This is a DATA-GENERATION script: it needs torch + the local nsflows package
-AND the raw NS run directories (generation_log.zip, U_max.zip, samples.zip),
-which are large and NOT bundled in this folder. By default it reads the runs
-under ../experiments/; pass run specs on the command line to override:
+and the NS run directories (generation_log.zip, U_max.zip, samples.zip). The
+two runs behind the figure are bundled under
+data/numerical_experiments/runs/<label>/, trimmed to the snapshots this script
+actually reads: the 45 generation events plus the final live set used for the
+E_IS proxy, 46 of 999, which is 23 MB per run instead of 500 MB. Pass run specs
+on the command line to point it at full runs of your own:
 
     python internal_complexity.py LABEL:RUNDIR:BOX [LABEL:RUNDIR:BOX ...]
 
-The precomputed output/internal_complexity_*.npz ship alongside, so the
-figure rebuilds without re-running this script.
+The bundled runs are the ones used for the figure in the paper:
+  L2.9 -- the flow run with a pool of 2e4 and cosine-annealing over 250
+          optimisation steps, shipped in full as
+          data/lj/K10000/L2.9/runs/CA_P2e4_250os/
+  L3.3 -- the corresponding run at the lower density, a21b665b in the archive
+
+The precomputed output of this script also ships, in
+data/numerical_experiments/, so the figure rebuilds without re-running it.
 """
 from __future__ import annotations
 
@@ -43,10 +52,11 @@ OUT = HERE / "output"
 N, CUTIN, TOL, N_CUM = 8, 0.8, 1e-3, 3
 ITER = re.compile(r"_(\d+)\.(?:pt|txt)$")
 
-# label : (run directory, box length).  The loose run is the newer L3.3.
+# label : (run directory, box length)
+RUNS_DIR = HERE.parent.parent / "data" / "numerical_experiments" / "runs"
 DEFAULT_RUNS = {
-    "L2.9": (HERE.parent.parent / "experiments" / "L2.9", 2.9),
-    "L3.3": (HERE.parent.parent / "experiments" / "L3.3_new", 3.3),
+    "L2.9": (RUNS_DIR / "L2.9", 2.9),
+    "L3.3": (RUNS_DIR / "L3.3", 3.3),
 }
 
 
