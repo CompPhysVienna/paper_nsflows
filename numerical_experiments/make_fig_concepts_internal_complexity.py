@@ -74,7 +74,7 @@ Z = np.linspace(-30.0, 30.0, 24001)
 PHI = np.exp(-Z ** 2 / 2) / np.sqrt(2 * np.pi)
 # np.trapezoid is NumPy >= 2.0; np.trapz is its name on the 1.x that
 # pyproject allows and that the paper environment pins.
-_trap = getattr(np, "trapezoid", np.trapz)
+_trap = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
 
 def _gauss(z, mu, var):
     return np.exp(-(z - mu) ** 2 / (2 * var)) / np.sqrt(2 * np.pi * var)
