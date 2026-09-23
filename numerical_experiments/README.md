@@ -52,11 +52,19 @@ file location, so they run correctly either as `python generate_data/bh_lj.py`
 from `numerical_experiments/` (as `run_all.sh` does) or as
 `python bh_lj.py` from inside `generate_data/`.
 
-`[RAW]` marks `internal_complexity.py`, which needs the large raw NS run
-directories (`generation_log.zip`, `U_max.zip`, `samples.zip`); these are
-**not** bundled here, so the precomputed
-`../data/numerical_experiments/internal_complexity_*.npz` ship instead and
-Figure 6 rebuilds without it.
+
+`[RAW]` marks `internal_complexity.py`, which reads NS run directories
+(`generation_log.zip`, `U_max.zip`, `samples.zip`). The two runs behind Figure 6
+are bundled under `../data/numerical_experiments/runs/<label>/`, trimmed to the
+snapshots the script actually touches: the 45 generation events plus the final
+live set used for the E_IS proxy, 46 of 999, so 23 MB per run rather than
+500 MB. They reproduce `internal_complexity_*.npz` exactly. Pass run specs on
+the command line, `LABEL:RUNDIR:BOX`, to point it at full runs of your own.
+
+The bundled runs are the ones used for the figure: `L2.9` is the flow run with a
+pool of 2x10^4 and cosine annealing over 250 optimisation steps, shipped in full
+as `../data/lj/K10000/L2.9/runs/CA_P2e4_250os/`, and `L3.3` is the corresponding
+run at the lower density.
 
 ## Reproducing
 
@@ -95,7 +103,7 @@ generate_data/hessian_spectrum.py ◄┘ ──► hessian_spectra.npz
                                     └──► generate_data/coupling_mi.py ──► coupling_mi.npz
 generate_data/probe_gw.py ────────────────────────────────────────────► gw_degeneracies.npz
 generate_data/probe_lj.py ────────────────────────────────────────────► lj_symmetries.npz
-generate_data/internal_complexity.py ◄── raw NS runs (not bundled) ──► internal_complexity_{L2.9,L3.3}.npz
+generate_data/internal_complexity.py ◄── runs/{L2.9,L3.3} (bundled, trimmed) ──► internal_complexity_{L2.9,L3.3}.npz
 
 make_fig_landscapes.py                                     ◄── gw_degeneracies, lj_symmetries, hessian_spectra, coupling_mi
 make_fig_internal_complexity_two_density_efficiency.py     ◄── internal_complexity_{L2.9,L3.3}

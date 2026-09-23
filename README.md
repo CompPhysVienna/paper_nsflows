@@ -288,9 +288,18 @@ regenerates everything in dependency order; see
 [`numerical_experiments/README.md`](numerical_experiments/README.md) for the full
 layout and data-flow. The gravitational-wave scripts need `bilby` and `lalsuite`,
 installed via the `numexp` extra (`pip install -e .[numexp]`) or from the pinned
-`numerical_experiments/requirements.txt`, and `internal_complexity.py` needs raw
-nested-sampling run directories that are not bundled here, so the precomputed
-`.npz` ship instead and the figure rebuilds without it.
+`numerical_experiments/requirements.txt`.
+
+`internal_complexity.py` reads two nested-sampling runs, bundled under
+`data/numerical_experiments/runs/`. They are trimmed to what the script actually
+touches, the 45 generation events plus the final live set, 46 of 999 snapshots,
+which is 23 MB per run instead of 500 MB; the values they produce are identical
+to the shipped `.npz`. The two runs are:
+
+| Label | Run | Also shipped as |
+|---|---|---|
+| `L2.9` | pool 2x10^4, cosine annealing over 250 optimisation steps | `data/lj/K10000/L2.9/runs/CA_P2e4_250os/` |
+| `L3.3` | the corresponding run at the lower density | — |
 
 ## Package layout
 
