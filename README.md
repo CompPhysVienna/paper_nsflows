@@ -315,7 +315,8 @@ python make_fig_alignment.py       # Fig. S1
 python make_fig_pool_picks.py      # Fig. S2
 python make_fig_hex_configs.py     # Fig. S3
 python make_fig_hex_efficiency.py  # Fig. S4
-python make_fig_lr_schedules.py    # Fig. S5
+python make_fig_dilution.py        # Fig. S5, --simulate checks the coverage model
+python make_fig_lr_schedules.py    # Fig. S6
 ```
 
 They read the runs through `common.py`, which resolves them under `data/lj/` by
