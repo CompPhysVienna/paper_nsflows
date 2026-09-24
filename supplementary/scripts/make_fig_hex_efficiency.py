@@ -32,7 +32,7 @@ ax.axvspan(25, 77, color="0.85", alpha=0.5, zorder=0, lw=0)
 ax.axhline(1e-2, color="k", ls="--", lw=1.0, alpha=0.5)
 ax.set_yscale("log")
 ax.set_xlabel("Nested-sampling progress [%]")
-ax.set_ylabel(r"Generation efficiency $\eta$")
+ax.set_ylabel(r"Generative efficiency $\eta$")
 ax.legend(loc="upper right", handletextpad=0.2, fontsize=ps.ANNOTATION_FONTSIZE)
 
 # b) Same conventions as the timing mosaic of Fig. 5 (new_plotter.ipynb).

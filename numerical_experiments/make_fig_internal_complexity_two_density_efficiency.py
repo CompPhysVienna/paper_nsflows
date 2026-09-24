@@ -168,7 +168,7 @@ def main() -> None:
         l33["valid"], (25, 80))
 
     # only the shared (leftmost) y-axis needs its own label now
-    axa.set_ylabel(r"generation efficiency $\eta$")
+    axa.set_ylabel(r"generative efficiency $\eta$")
 
     # share a common y-range across both panels
     ylo = min(axa.get_ylim()[0], axb.get_ylim()[0]) #- 0.05 * (axa.get_ylim()[1] - axa.get_ylim()[0])
