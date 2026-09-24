@@ -180,6 +180,8 @@ class PBCDataset(Dataset):
         self.data_dimensions  = flow.posterior.dimensions
         self.data_n_particles = flow.posterior.n_particles
         self.data_box_length  = flow.posterior.box_length
+        # Axis permutations are not a symmetry of an orthorhombic cell.
+        self.data_orthorhombic_cell = getattr(flow.posterior, "orthorhombic_cell", False)
 
         assert flow.posterior.PBC, "PBCDataset can only be used for dataset with PBC"
 
@@ -233,7 +235,8 @@ class PBCDataset(Dataset):
             train_item_p[[indx, 0]] = train_item_p[[0, indx]]
 
             # octahedral transformations
-            base_oct = octahedral_transformation(self.data_dimensions, self.device)
+            base_oct = octahedral_transformation(self.data_dimensions, self.device,
+                                                 orthorhombic_cell=self.data_orthorhombic_cell)
             full_oct = base_oct.repeat(self.data_n_particles, 1, 1)
             train_item = torch.bmm(train_item_p.unsqueeze(1), full_oct).reshape(self.data_n_particles*self.data_dimensions)
         elif self.transform:

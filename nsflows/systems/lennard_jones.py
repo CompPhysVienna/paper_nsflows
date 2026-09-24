@@ -5,7 +5,7 @@ from nsflows.systems.base import base_system
 
 class lennard_jones(base_system):
 
-    def __init__(self, n_particles, dimensions, rho, device, lattice_type="FCC", epsilon = 1, sigma = 1, cutoff = None, cutin = None, lrc = True, tol = 1.e-12):
+    def __init__(self, n_particles, dimensions, rho, device, lattice_type="FCC", epsilon = 1, sigma = 1, cutoff = None, cutin = None, lrc = True, tol = 1.e-12, aspect_ratio = None):
         super(lennard_jones, self).__init__(n_particles, dimensions, device)
         """
         Initializes the model function with parameters.
@@ -26,6 +26,9 @@ class lennard_jones(base_system):
             Zero raises an exception, use None for standard non-linearized LJ potential.
         - lrc (bool): Computes long-range corrections for energy and pressure.
         - tol (float): Tolerance used to clamp small values of distance.
+        - aspect_ratio (float/None): L_y / L_x of the simulation cell. None (default) gives a
+            square cell. A value makes the cell orthorhombic at the same density, which is what
+            the rectangular-cell runs use to accommodate a triangular lattice (2/sqrt(3)).
         """
 
         assert self.dimensions == 2, "Only two dimensions are supported"
@@ -42,7 +45,6 @@ class lennard_jones(base_system):
 
         # Periodic boundary conditions, length of the box and density of the system
         self.PBC = True
-        self.orthorhombic_cell = False
 
         n_elem = {"FCC" : 2}
         self.lattice_type = lattice_type
@@ -52,10 +54,22 @@ class lennard_jones(base_system):
 
         self.a = (n_elem[self.lattice_type]/self.rho)**(1/self.dimensions) # reduced units
         n = int(np.ceil((n_particles/n_elem[self.lattice_type])**(1/self.dimensions)))
-        L = n*self.a*np.ones(self.dimensions) # reduced units
-        V = L.prod()
-        s = ((self.n_particles/V)/(n_elem[self.lattice_type]*(n**self.dimensions)/V))**(1/self.dimensions)
-        self.box_length = torch.from_numpy((s*L).astype(np.float32)).to(self.device) # reduced units
+        if aspect_ratio is None:
+            # Square cell: scale the lattice box so that N/V matches rho exactly.
+            L = n*self.a*np.ones(self.dimensions) # reduced units
+            V = L.prod()
+            s = ((self.n_particles/V)/(n_elem[self.lattice_type]*(n**self.dimensions)/V))**(1/self.dimensions)
+            L = s*L
+            self.orthorhombic_cell = False
+        else:
+            # Orthorhombic cell of the same volume, L_y = aspect_ratio * L_x, so the
+            # density is exact by construction.
+            V = self.n_particles / self.rho
+            L_x = np.sqrt(V / aspect_ratio)
+            L = np.array([L_x, aspect_ratio * L_x])
+            self.orthorhombic_cell = True
+
+        self.box_length = torch.from_numpy(L.astype(np.float32)).to(self.device) # reduced units
         self.volume = self.box_length.prod().cpu().numpy()
         
         assert np.abs(self.rho - self.n_particles/self.volume) < np.sqrt(tol), f"Error in computing box length from density: rho = {self.rho}, N/V = {self.n_particles/self.volume}"

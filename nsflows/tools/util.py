@@ -90,12 +90,26 @@ def transform_dataset(x, n_particles, dimensions, box_length, PBC=True):
     return x
 
 
-def octahedral_transformation(dimensions, device):
-        
+def octahedral_transformation(dimensions, device, orthorhombic_cell=False):
+        """
+        Random symmetry operation of the simulation cell, used to augment the
+        training set.
+
+        - orthorhombic_cell False (default): the full hyperoctahedral group,
+          axis permutations composed with reflections. D_4 in two dimensions.
+        - orthorhombic_cell True: reflections only, since permuting axes of
+          different length is not a symmetry of the cell. D_2 in two dimensions.
+        """
+
         identity = torch.eye(dimensions, dtype=torch.float32, device=device)
-        permuted_axes = identity[:, torch.randperm(dimensions)]            
+
+        if orthorhombic_cell:
+            permuted_axes = identity
+        else:
+            permuted_axes = identity[:, torch.randperm(dimensions)]
+
         reflect = torch.randint(0, 2, size=(dimensions,), device=device) * 2 - 1
-        
+
         return (reflect*permuted_axes).unsqueeze(0)
 
 

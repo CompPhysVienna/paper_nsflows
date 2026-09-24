@@ -24,7 +24,17 @@ class rejection_monte_carlo(base_sampler):
         self.dofs = system.dofs  # Degrees of freedom (n_particles * dimensions).
         self.device = system.device  # Torch device (CPU/GPU).
 
-        self.step_size = step_size  # Maximum displacement per step.
+        # Maximum displacement per step, kept per axis. A scalar is scaled by
+        # L_alpha / max(L), so in an orthorhombic cell each axis is explored in
+        # proportion to its length; in a square cell every factor is 1 and the
+        # behaviour is unchanged.
+        if np.isscalar(step_size):
+            self.step_size = (float(step_size) * self.system.box_length
+                              / torch.max(self.system.box_length))
+        else:
+            self.step_size = torch.as_tensor(step_size, dtype=torch.float32, device=self.device)
+            assert self.step_size.shape == (self.dimensions,), \
+                f"step_size must be a scalar or have shape ({self.dimensions},)"
         self.n_cycles = n_cycles  # Number of cycles for sampling.
         
         self.x0 = None  # Stores the initial configuration.
@@ -62,7 +72,8 @@ class rejection_monte_carlo(base_sampler):
             + torch.arange(self.dimensions, device=self.device)
         ).reshape(-1)
 
-        shift[rows, cols] = (torch.rand(rows.shape, device=self.device) * 2 - 1) * dx
+        rand_disp = (torch.rand((n_samples, self.dimensions), device=self.device) * 2 - 1) * dx
+        shift[rows, cols] = rand_disp.reshape(-1)
 
         xp = x + shift  # proposed configs, still (n_samples, dofs)
 
