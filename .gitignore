@@ -1,8 +1,9 @@
 # Nested sampling run directories (output/<run-id>/...)
 output/
 
-# Figures regenerated from the notebooks
+# Figures and tables regenerated from the notebooks and scripts
 figures/
+supplementary/tables/
 
 # Run outputs
 *.db

@@ -15,6 +15,7 @@ constrained-prior sampling step is performed by a normalizing flow.
 | 2, 3, 4, 5, 7 | [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) |
 | 6 | [`numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py`](numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py) |
 | 8 | [`numerical_experiments/make_fig_concepts_internal_complexity.py`](numerical_experiments/make_fig_concepts_internal_complexity.py) |
+| S1–S5, Table S2 | [`supplementary/scripts/`](supplementary/scripts) |
 
 All of them read data included here, so every figure rebuilds from a fresh clone
 without re-running any simulation. The runs behind Figures 4 and 5 can also be
@@ -300,6 +301,44 @@ to the shipped `.npz`. The two runs are:
 |---|---|---|
 | `L2.9` | pool 2x10^4, cosine annealing over 250 optimisation steps | `data/lj/K10000/L2.9/runs/CA_P2e4_250os/` |
 | `L3.3` | the corresponding run at the lower density | — |
+
+### Supplementary Material
+
+`supplementary/scripts/` regenerates the Supplementary figures and Table S2.
+Each script writes into `supplementary/figures/`, and `make_table_runs.py` into
+`supplementary/tables/`; both are regenerated, so neither is tracked.
+
+```bash
+cd supplementary/scripts
+python make_table_runs.py          # Table S2, the energy budget of every run
+python make_fig_alignment.py       # Fig. S1
+python make_fig_pool_picks.py      # Fig. S2
+python make_fig_hex_configs.py     # Fig. S3
+python make_fig_hex_efficiency.py  # Fig. S4
+python make_fig_lr_schedules.py    # Fig. S5
+```
+
+They read the runs through `common.py`, which resolves them under `data/lj/` by
+default. Set `NSFLOWS_RUN_ROOT` to point at a full run archive instead. What is
+shipped per run is what these scripts read: the compressed `output.txt`, the
+generation and training logs, the per-pool `conds_*.pt` and, for the rectangular
+cell, a few configuration snapshots and the final live set.
+
+Ten runs are covered: the six of Figure 5, the flow run behind Figure 3, the
+standard nested sampling reference, the lower-density run of Figure 6, and the
+rectangular-cell run of Figures S3 and S4.
+
+### The rectangular cell
+
+The Supplementary runs nine particles in a cell with `L_y / L_x = 2/sqrt(3)`, the
+aspect ratio of a triangular lattice. `lennard_jones` and `box_uniform` take an
+`aspect_ratio`, the Monte Carlo step is scaled per axis, and the augmentation
+drops to reflections only, since permuting axes of different length is not a
+symmetry of the cell. A square cell is unaffected: every per-axis factor is one
+and the augmentation group is unchanged.
+
+[`LJ-disks/nsflows_rect_cell.ipynb`](LJ-disks/nsflows_rect_cell.ipynb) is the
+notebook that produced that run.
 
 ## Package layout
 
