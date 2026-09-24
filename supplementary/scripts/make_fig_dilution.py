@@ -82,11 +82,11 @@ def main(simulate=False):
     axb.annotate(rf"$\mathscr{{M}}\to 0$: {ceiling:.0f}$\times$",
                  xy=(250, ceiling), xytext=(120, ceiling + 4),
                  fontsize=ps.ANNOTATION_FONTSIZE)
-    marks = ((M_RUN, rf"$\mathscr{{M}}={M_RUN}$ (this work)", 8),
-             (M_full, rf"$\mathscr{{M}}={M_full}$ ($P_1={P_FULL}$)", -28))
-    for M, txt, dy in marks:
+    marks = ((M_RUN, rf"$\mathscr{{M}}={M_RUN}$ (this work)", 8, 8),
+             (M_full, rf"$\mathscr{{M}}={M_full}$ ($P_1={P_FULL}$)", 12, 0))
+    for M, txt, dx, dy in marks:
         axb.plot([M], [reduction(M)], "o", color="k", ms=ps.MS)
-        axb.annotate(txt, xy=(M, reduction(M)), xytext=(M + 8, reduction(M) + dy),
+        axb.annotate(txt, xy=(M, reduction(M)), xytext=(M + dx, reduction(M) + dy),
                      fontsize=ps.ANNOTATION_FONTSIZE)
     axb.set_xlabel(r"Dilution Steps $\mathscr{M}$")
     axb.set_ylabel("Reduction in Energy Evaluations")
