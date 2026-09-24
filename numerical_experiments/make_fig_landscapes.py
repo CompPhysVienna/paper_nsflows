@@ -162,7 +162,7 @@ def main() -> None:
     ax = axes[0, 0]
     cost_q = logl_truth - gw["logl_mq"][mc_idx, :]
     ax.plot(q_grid, cost_q, color=GW_C, lw=1.8)
-    ax.axvline(truth_q, color=TRUTH_C, lw=1.2, ls="--", label="injection")
+    ax.axvline(truth_q, color=TRUTH_C, lw=1.2, ls="--", label="Injection")
     # "injection" label, rotated 90 deg CCW; both x and y are plain
     # axes-fraction coordinates (0-1) -- tweak these two numbers to
     # reposition it. x=0.78 is roughly where the vline sits; nudge right
@@ -172,9 +172,9 @@ def main() -> None:
             color="black", fontsize=ps.ANNOTATION_FONTSIZE_SMALL,
             ha="right", va="top")
     ax.set_yscale("symlog", linthresh=1.0)
-    ax.set_xlabel(r"mass ratio $q$")
+    ax.set_xlabel(r"Mass Ratio $q$")
     ax.set_ylabel(r"$-\Delta\log\mathcal{L}$", labelpad=-5)
-    ax.set_title("one coordinate:\n" + r"$q$ at $\mathcal{M}_{\rm inj}$")#, fontsize=ps.TITLE_FONTSIZE)
+    ax.set_title("One Coordinate:\n" + r"$q$ at $\mathcal{M}_{\rm inj}$")#, fontsize=ps.TITLE_FONTSIZE)
     # ax.legend(loc="upper center")
     # ax.grid(True, alpha=0.25, which="both")
     panel_label(ax, "a)")
@@ -190,9 +190,9 @@ def main() -> None:
                            q_grid.min(), q_grid.max()))
     ax.scatter([truth_mc], [truth_q], marker="x", c=TRUTH_C, s=55, lw=2,
                zorder=5)
-    ax.set_xlabel(r"chirp mass $\mathcal{M}\;[M_\odot]$")
-    ax.set_ylabel(r"mass ratio $q$")
-    ax.set_title("two coordinates:\n" + r"$(\mathcal{M}, q)$")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_xlabel(r"Chirp Mass $\mathcal{M}\;[M_\odot]$")
+    ax.set_ylabel(r"Mass Ratio $q$")
+    ax.set_title("Two Coordinates:\n" + r"$(\mathcal{M}, q)$")#, fontsize=ps.ANNOTATION_FONTSIZE)
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
     cb.set_label(r"$-\Delta\log\mathcal{L}$", fontsize=ps.TICK_LABELSIZE, rotation=90, labelpad=-12)
     cb.set_ticks([0, 1e1, 1e2, 1e3])
@@ -210,7 +210,7 @@ def main() -> None:
     ax.set_yticks(range(len(names)))
     ax.set_xticklabels(names, rotation=90, fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
     ax.set_yticklabels(names, fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_title("Fisher coupling\nat mode")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_title("Fisher Coupling\nat Mode")#, fontsize=ps.ANNOTATION_FONTSIZE)
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
     cb.set_label(r"$|H_{ij}|/\max|H|$", fontsize=ps.TICK_LABELSIZE, labelpad=-15)
     # keep a tick at every decade, but only label the ends (10^0, 10^-3)
@@ -230,7 +230,7 @@ def main() -> None:
     ax.set_yticks(range(len(names_gw_mi)))
     ax.set_xticklabels(names_gw_mi, rotation=90, fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
     ax.set_yticklabels(names_gw_mi, fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_title("coordinate NMI\n")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_title("Coordinate NMI\n")#, fontsize=ps.ANNOTATION_FONTSIZE)
     ax.text(0.65, 0.04,
             f"conc. {float(mi['conc_gw']):.2f}\n"
             r"$\langle\mathrm{NMI}\rangle$="
@@ -263,7 +263,7 @@ def main() -> None:
     ax.set_yscale("symlog", linthresh=1.0)
     ax.set_xlabel(rf"swap $({ij[0]},{ij[1]})$ coordinate $t$")
     ax.set_ylabel(r"$U - U_0$", labelpad=-5)
-    ax.set_title("one coordinate\n(single swap)")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_title("One Coordinate\n(Single Swap)")#, fontsize=ps.ANNOTATION_FONTSIZE)
     # ax.grid(True, alpha=0.25, which="both")
     panel_label(ax, "e)")
 
@@ -314,7 +314,7 @@ def main() -> None:
         ax.scatter([x], [y], marker="x", c=TRUTH_C, s=45, lw=1.8, zorder=5)
     ax.set_xlabel(rf"swap $({swap2[0]},{swap2[1]})$ coordinate $t_1$")
     ax.set_ylabel(rf"swap $({swap2[2]},{swap2[3]})$ coordinate $t_2$")
-    ax.set_title("two coordinates\n(two swaps)")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_title("Two Coordinates\n(Two Swaps)")#, fontsize=ps.ANNOTATION_FONTSIZE)
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
     cb.set_label(r"$U-U_0$", fontsize=ps.TICK_LABELSIZE, rotation=90, labelpad=-12)
     cb.set_ticks([0, 1e1, 1e2, 1e3])
@@ -329,9 +329,9 @@ def main() -> None:
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.tick_params(labelbottom=False, labelleft=False)
-    ax.set_xlabel("coordinate index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_ylabel("coordinate index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_title("Hessian coupling\nat mode")# , fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_xlabel("Coordinate Index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
+    ax.set_ylabel("Coordinate Index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
+    ax.set_title("Hessian Coupling\nat Mode")# , fontsize=ps.ANNOTATION_FONTSIZE)
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
     cb.set_label(r"$|H_{ij}|/\max|H|$", fontsize=ps.TICK_LABELSIZE, labelpad=-15)
     cb.set_ticks([1e0, 1e-1, 1e-2, 1e-3])
@@ -349,9 +349,9 @@ def main() -> None:
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.tick_params(labelbottom=False, labelleft=False)
-    ax.set_xlabel("coordinate index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_ylabel("coordinate index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
-    ax.set_title("coordinate NMI\n")#, fontsize=ps.ANNOTATION_FONTSIZE)
+    ax.set_xlabel("Coordinate Index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
+    ax.set_ylabel("Coordinate Index", fontsize=ps.ANNOTATION_FONTSIZE_SMALL)
+    ax.set_title("Coordinate NMI\n")#, fontsize=ps.ANNOTATION_FONTSIZE)
     ax.text(0.65, 0.04,
             f"conc. {float(mi['conc_lj']):.2f}\n"
             r"$\langle\mathrm{NMI}\rangle$="

@@ -31,8 +31,8 @@ for key, label, marker, color in [("hex", r"$2:\sqrt{3}$, $N=9$", "^", "C0"),
 ax.axvspan(25, 77, color="0.85", alpha=0.5, zorder=0, lw=0)
 ax.axhline(1e-2, color="k", ls="--", lw=1.0, alpha=0.5)
 ax.set_yscale("log")
-ax.set_xlabel("Nested-sampling progress [%]")
-ax.set_ylabel(r"Generative efficiency $\eta$")
+ax.set_xlabel("Nested-Sampling Progress [%]")
+ax.set_ylabel(r"Generative Efficiency $\eta$")
 ax.legend(loc="upper right", handletextpad=0.2, fontsize=ps.ANNOTATION_FONTSIZE)
 
 # b) Same conventions as the timing mosaic of Fig. 5 (new_plotter.ipynb).
@@ -42,12 +42,12 @@ t = cm.read_timings(run) / 3600
 training, generation = t[:, 2], t[:, 3]
 pools = np.arange(1, len(t) + 1)
 ax.bar(pools, training, width=0.75, color="C0", edgecolor="black", linewidth=0.25,
-       label="Network training")
+       label="Network Training")
 ax.bar(pools, generation, bottom=training, width=0.75, color="C1", alpha=0.85,
-       edgecolor="black", linewidth=0.25, label="Pool generation")
+       edgecolor="black", linewidth=0.25, label="Pool Generation")
 ax.grid(axis="y", alpha=0.25, lw=0.6)
-ax.set_xlabel("Pool generated")
-ax.set_ylabel("Time (hours)")
+ax.set_xlabel("Pool Generated")
+ax.set_ylabel("Time (Hours)")
 ax.set_ylim(0, 1.45 * (training + generation).max())
 ax.margins(x=0.02)
 ax.legend(loc="upper right", fontsize=ps.ANNOTATION_FONTSIZE)

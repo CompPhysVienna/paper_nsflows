@@ -79,11 +79,11 @@ for key, label, color, ls in RUNS:
 
 axes[0].set_xscale("log")
 axes[0].set_yscale("log")
-axes[0].set_xlabel("Optimization step")
-axes[0].set_ylabel("Learning rate")
+axes[0].set_xlabel("Optimization Step")
+axes[0].set_ylabel("Learning Rate")
 
 axes[1].set_xscale("log")
-axes[1].set_xlabel("Optimization step")
+axes[1].set_xlabel("Optimization Step")
 axes[1].set_ylabel("Validation RESS")
 axes[1].legend(loc="upper left", fontsize=ps.ANNOTATION_FONTSIZE)
 

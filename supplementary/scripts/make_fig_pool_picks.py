@@ -46,11 +46,11 @@ for ax, (key, label, color) in zip(axes, runs):
           f"{(flow_picks > 1).mean():.3f}, NS iterations per pool {np.mean([len(p) for p in per_pool]):.0f}, "
           f"pools {len(per_pool)}")
 
-axes[-1].set_xlabel(r"NS iteration ($\times 10^5$)")
-fig.supylabel("Pool draws per iteration", fontsize=ps.AXES_LABELSIZE)
+axes[-1].set_xlabel(r"NS Iteration ($\times 10^5$)")
+fig.supylabel("Pool Draws per Iteration", fontsize=ps.AXES_LABELSIZE)
 
 handles = [mlines.Line2D([], [], color=c, label=f"Pool size {l}") for _, l, c in runs]
-handles.append(mlines.Line2D([], [], color="k", ls=":", label="Pool exhausted"))
+handles.append(mlines.Line2D([], [], color="k", ls=":", label="Pool Exhausted"))
 axes[0].legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 1.02), ncol=3)
 
 ps.savefig_all(fig, cm.FIG_DIR / "fig_pool_picks", print_scale=ps.PRINT_SCALE)

@@ -199,10 +199,10 @@ def main() -> None:
     ib = RNG.choice(len(cloud_b), nplot, replace=False)
     ax_a.scatter(cloud_a[ia, 0], cloud_a[ia, 1], s=34, facecolors="none",
                  edgecolors="#2ca02c", linewidths=1.1, marker="o", alpha=0.9,
-                 label="Gaussian (easy)", zorder=2)
+                 label="Gaussian (Easy)", zorder=2)
     ax_a.scatter(cloud_b[ib, 0], cloud_b[ib, 1], s=34, c="#d62728",
                  linewidths=1.1, marker="x", alpha=0.9,
-                 label="bimodal (hard)", zorder=3)
+                 label="Bimodal (Hard)", zorder=3)
     ax_a.add_patch(ellipse(cov_a, "k",
                            rf"shared cov. ($D_{{\mathrm{{eff}}}}={deff_a:.2f}$)"))
     ax_a.set_xlim(lim); ax_a.set_ylim(ylim)
@@ -225,8 +225,8 @@ def main() -> None:
         ax_b.plot(Z, fn(Z), color=c, lw=1.8, label=name)
     ax_b.set_xlim(-4, 4)
     ax_b.set_ylim(bottom=0)
-    ax_b.set_xlabel(r"standardized coordinate $z$")
-    ax_b.set_ylabel(r"density $p(z)$")
+    ax_b.set_xlabel(r"Standardized Coordinate $z$")
+    ax_b.set_ylabel(r"Density $p(z)$")
     # legend moved above the panel, forced to 2 columns (6 entries -> 3
     # rows) so it doesn't run wider than the panel itself.
     ax_b.legend(loc="lower center", bbox_to_anchor=(0.5, 1.05), ncol=2,
@@ -278,8 +278,8 @@ def main() -> None:
     ax_c.set_xscale("symlog", linthresh=1.0)
     ax_c.set_xlim(-30, 60)
     ax_c.set_ylim(-0.08, 1.45)
-    ax_c.set_xlabel(r"excess kurtosis $\kappa$")
-    ax_c.set_ylabel(r"negentropy $J$")
+    ax_c.set_xlabel(r"Excess Kurtosis $\kappa$")
+    ax_c.set_ylabel(r"Negentropy $J$")
     ax_c.grid(True, alpha=0.4, zorder=1.2, linewidth=0.6)
     ax_c.text(0.03, 0.60, "kept by $M$\n(multimodal,\nHARD)", color="#b22222",
               transform=ax_c.transAxes, ha="left", va="top", fontsize=label_fontsize)

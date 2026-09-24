@@ -71,10 +71,10 @@ def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
     ax.plot(x[o], eMc[o], "--", color=M_C, lw=1.4, alpha=0.85, zorder=2,
             label=r"$M_k^{\mathrm{cum}}$")
     ax.plot(x[o], eMcd[o], "--", color=MCD_C, lw=1.7, alpha=0.9, zorder=2,
-            label=r"$M_k^{\mathrm{cum}}+$drift")
+            label=r"$M_k^{\mathrm{cum}}+$Drift")
     ax.scatter(x, eff, marker="^", s=42, facecolors="none",
                edgecolors=ATT_C, linewidths=1.3, zorder=4,
-               label=r"measured efficiency $\eta$")
+               label=r"Measured Efficiency $\eta$")
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -168,7 +168,7 @@ def main() -> None:
         l33["valid"], (25, 80))
 
     # only the shared (leftmost) y-axis needs its own label now
-    axa.set_ylabel(r"generative efficiency $\eta$")
+    axa.set_ylabel(r"Generative Efficiency $\eta$")
 
     # share a common y-range across both panels
     ylo = min(axa.get_ylim()[0], axb.get_ylim()[0]) #- 0.05 * (axa.get_ylim()[1] - axa.get_ylim()[0])
