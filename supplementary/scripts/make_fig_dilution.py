@@ -1,8 +1,10 @@
 """
-Fig. S6: how many dilution steps are needed, and what they cost.
+Fig. S5: how many dilution steps are needed, and what they cost.
 
 Every time the pool is exhausted the algorithm runs M standard NS iterations
-before retraining. Each of them refreshes n_propagate of the K live points: the
+before retraining. The last pool is never exhausted, so a run with n_pools pools
+performs n_pools - 1 dilution stages; the M' = 100 warm-up iterations that precede
+the first pool do not scale with M and count as a fixed cost. Each of them refreshes n_propagate of the K live points: the
 highest-energy walker, which is always replaced, plus n_propagate - 1 others
 drawn uniformly without replacement. Across iterations the draws are
 independent, so a given walker is missed with probability (1 - p)^M with
@@ -50,9 +52,11 @@ def main(simulate=False):
     # ---- cost model: only the dilution term scales with M ------------------
     b = cm.energy_budget(cm.run_dir("f"))
     per_iteration = b["mcmc"] / b["n_std_iterations"]
-    n_pools = b["n_pools"]
-    fixed = b["total"] - b["mcmc"]                    # generation, training, pool draws
-    reduction = lambda M: STD_NS_EVALS / (fixed + n_pools * M * per_iteration)
+    n_stages = b["n_pools"] - 1                       # the last pool is never exhausted
+    # Everything that does not scale with M: generation, training, pool draws and the
+    # M' = 100 warm-up iterations that precede the first pool.
+    fixed = b["total"] - n_stages * M_RUN * per_iteration
+    reduction = lambda M: STD_NS_EVALS / (fixed + n_stages * M * per_iteration)
 
     ceiling = STD_NS_EVALS / fixed
     M_grid = np.arange(1, 251)
@@ -97,7 +101,7 @@ def main(simulate=False):
 
     # ---- numbers quoted in the text ---------------------------------------
     print(f"p = {p:.6f}   coupon-collector scale ln(K)/-ln(1-p) = {np.log(K)/-np.log(1-p):.1f}")
-    print(f"fixed (non-dilution) cost {fixed/1e8:.2f}e8, {n_pools} pools, "
+    print(f"fixed (non-dilution) cost {fixed/1e8:.2f}e8, {n_stages} dilution stages, "
           f"{per_iteration:.0f} evaluations per iteration, ceiling {ceiling:.0f}x")
     print(f"M for P(all refreshed) >= {P_FULL}: {M_full}  -> reduction {reduction(M_full):.0f}x")
     for M in (87, M_RUN, M_full, 159):
