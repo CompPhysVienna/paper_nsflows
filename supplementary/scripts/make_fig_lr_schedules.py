@@ -1,5 +1,5 @@
 """
-Fig. S5: the two learning-rate schedules of Fig. 5, as used in the production runs.
+Fig. S6: the two learning-rate schedules of Fig. 5, as used in the production runs.
 
 a) learning rate against optimization step within one training stage, for the long and
    short versions of 1C+CA (runs 5a, 5b) and CA (runs 5e, 5f);
