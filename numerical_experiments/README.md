@@ -109,6 +109,15 @@ make_fig_landscapes.py                                     ◄── gw_degenera
 make_fig_internal_complexity_two_density_efficiency.py     ◄── internal_complexity_{L2.9,L3.3}
 ```
 
+## Reproducibility caveats
+
+`run_all.sh` reproduces the LJ panels of Figure 1 exactly, given the pinned
+`numpy==1.26.4` (`bh_lj.py`'s basin-hopping search is otherwise sensitive to
+NumPy version). The GW panels don't reproduce bit-for-bit in any
+environment — bilby draws its injected detector noise from its own
+unseeded internal RNG, independent of the scripts' `np.random.seed(...)`
+calls, so every run differs.
+
 ## Notes
 
 - `make_fig_*.py` save both `.pdf` and `.png` into `./figures/`.

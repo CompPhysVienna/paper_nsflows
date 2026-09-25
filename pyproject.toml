@@ -12,18 +12,18 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=1.26",
-    "scipy>=1.12",
-    "torch>=2.2",
-    "matplotlib>=3.8",
-    "einops>=0.7",
-    "tqdm>=4.66",
+    "numpy==1.26.4",
+    "scipy==1.12.0",
+    "torch==2.2.1",
+    "matplotlib==3.8.0",
+    "einops==0.7.0",
+    "tqdm==4.67.1",
 ]
 
 [project.optional-dependencies]
 numexp = [
-    "bilby>=2.8",
-    "lalsuite>=7.0",
+    "bilby==2.8.0",
+    "lalsuite==7.26.13",
 ]
 
 [tool.setuptools.packages.find]

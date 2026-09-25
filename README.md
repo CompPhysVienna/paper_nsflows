@@ -59,12 +59,22 @@ lets conda solve them for the current platform.
 ```bash
 conda env create -f conda_envs/environment.yml
 conda activate nsflows
-pip install -e .
+pip install -e . --no-deps
 ```
 
 This installs the CPU build of PyTorch by default. To get the GPU build used in
 the paper, uncomment the `pytorch-cuda=11.8` line in the file before creating
 the environment.
+
+Use `--no-deps` here: `pyproject.toml` pins exact versions (matching
+`requirements.txt`, for reproducibility — see below), but this route lets
+conda solve open-ended ranges for the current platform, so conda's resolved
+versions won't generally match those exact pins. Without `--no-deps`, `pip
+install -e .` would try to force everything back to the exact pinned
+versions, silently replacing conda's platform-appropriate build — including
+a GPU-enabled PyTorch — with the plain CPU wheel from PyPI. `--no-deps`
+installs only `nsflows` itself and trusts conda's already-solved
+dependencies.
 
 ### 3. pip / virtualenv
 
@@ -288,7 +298,9 @@ regenerates everything in dependency order; see
 [`numerical_experiments/README.md`](numerical_experiments/README.md) for the full
 layout and data-flow. The gravitational-wave scripts need `bilby` and `lalsuite`,
 installed via the `numexp` extra (`pip install -e .[numexp]`) or from the pinned
-`numerical_experiments/requirements.txt`.
+`numerical_experiments/requirements.txt`. See
+[`numerical_experiments/README.md`](numerical_experiments/README.md#reproducibility-caveats)
+for a reproducibility note on the GW panels of Figure 1.
 
 `internal_complexity.py` reads two nested-sampling runs, bundled under
 `data/numerical_experiments/runs/`. They are trimmed to what the script actually
