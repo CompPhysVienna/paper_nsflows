@@ -9,9 +9,6 @@ snapshots. Point the variable at a full run archive to use complete runs.
 """
 
 import os
-import re
-import glob
-import gzip
 from pathlib import Path
 
 import numpy as np
@@ -35,7 +32,6 @@ RUNS = {
     "d": "K10000/L2.9/runs/1C-CA_P2e4_750-250os",
     "e": "K10000/L2.9/runs/CA_P1e5_500os",
     "f": "K10000/L2.9/runs/CA_P2e4_250os",
-    "fig3": "K10000/L2.9/runs/1C-CA_P2e4_750-250os_fig3",
     "L3.3": "K10000/L3.3/runs/CA_P2e4_250os",
     "hex": "rect_N9_rho0.95/runs/CA_P2e4_250os",
     "std": "K10000/L2.9/runs/STD_NS",
