@@ -14,7 +14,7 @@ at n_prop = K does every walker get exactly M of them, with no tail at zero.
 
 Panel a: probability that every walker is refreshed, at fixed cost, against n_prop.
 Panel b: what guaranteed refreshment costs, as the reduction in energy evaluations
-of the run of Fig. 5f when M is set to the smallest value reaching P_1 >= 0.99.
+of the run of Fig. 4f when M is set to the smallest value reaching P_1 >= 0.99.
 
 Since P(Bin(M,p) >= 1) = 1 - (1-p)^M is smooth in M, panel a uses that closed form
 and does not need M to be an integer. Panel b does, and takes the ceiling.

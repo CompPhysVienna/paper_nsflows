@@ -1,5 +1,5 @@
 """
-Fig. S2: number of pool draws needed per NS iteration, for the two CA runs of Fig. 5
+Fig. S2: number of pool draws needed per NS iteration, for the two CA runs of Fig. 4
 (e: pool of 1e5, f: pool of 2e4). Ported from the last plotting cell of
 LJ-disks/nsflows_vconst.ipynb.
 

@@ -2,7 +2,7 @@
 Fig. S4: generation efficiency and cost of the 2:sqrt(3) run.
 
 a) generation efficiency (inverse number of generation attempts per pool) along the NS
-   trajectory, for the rectangular cell (N = 9) and for the square-box run of Fig. 5f
+   trajectory, for the rectangular cell (N = 9) and for the square-box run of Fig. 4f
    (N = 8), which uses the same NS and training hyperparameters;
 b) time spent training the flow and generating each pool in the rectangular cell.
 """
@@ -27,7 +27,7 @@ for key, label, marker, color in [("hex", r"$2:\sqrt{3}$, $N=9$", "^", "C0"),
     ax.plot(progress, 1 / attempts, marker, mfc="none", color=color, label=label)
     print(f"{key}: efficiency min {1 / attempts.max():.2e} at {progress[attempts.argmax()]:.0f}%, "
           f"last {1 / attempts[-1]:.2e}, first {1 / attempts[0]:.2e}")
-# Low-efficiency regime of the rectangular cell (cf. the grey bands of Fig. 6).
+# Low-efficiency regime of the rectangular cell (cf. the grey bands of Fig. 5).
 ax.axvspan(25, 77, color="0.85", alpha=0.5, zorder=0, lw=0)
 ax.axhline(1e-2, color="k", ls="--", lw=1.0, alpha=0.5)
 ax.set_yscale("log")
@@ -35,7 +35,7 @@ ax.set_xlabel("Nested-Sampling Progress [%]")
 ax.set_ylabel(r"Generative Efficiency $\eta$")
 ax.legend(loc="upper right", handletextpad=0.2, fontsize=ps.ANNOTATION_FONTSIZE)
 
-# b) Same conventions as the timing mosaic of Fig. 5 (new_plotter.ipynb).
+# b) Same conventions as the timing mosaic of Fig. 4 (new_plotter.ipynb).
 ax = axes[1]
 run = cm.run_dir("hex")
 t = cm.read_timings(run) / 3600

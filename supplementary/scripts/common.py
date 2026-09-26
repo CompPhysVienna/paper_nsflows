@@ -24,7 +24,7 @@ TAB_DIR = SUPP / "tables"
 
 RUN_ROOT = Path(os.environ.get("NSFLOWS_RUN_ROOT", REPO / "data" / "lj"))
 
-# Runs behind the figures of the main text (panel letters of Fig. 5) and of this SM.
+# Runs behind the figures of the main text (panel letters of Fig. 4) and of this SM.
 RUNS = {
     "a": "K10000/L2.9/runs/1C_P1e5_4500os",
     "b": "K10000/L2.9/runs/1C_P2e4_1000os",

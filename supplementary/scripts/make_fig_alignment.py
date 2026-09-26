@@ -3,7 +3,7 @@ Fig. S1: alignment of low-energy configurations in the square (1:1) box.
 
 a) the alignment reference, with the outermost particle that is excluded from the matching;
 b) matching cost of the reference against its own images under the eight operations of D4;
-c) final live set of a flow-based run (Fig. 5f) in internal coordinates, unaligned, with
+c) final live set of a flow-based run (Fig. 4f) in internal coordinates, unaligned, with
    the lattices of the two crystal orientations overlaid;
 d) the same live set after alignment.
 """

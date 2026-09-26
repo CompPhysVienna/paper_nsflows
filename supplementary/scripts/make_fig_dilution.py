@@ -12,7 +12,7 @@ p = (n_propagate - 1) / (K - 1), and the number of iterations needed to touch
 every walker is the coupon-collector problem.
 
 Panel a: probability that every walker has been picked at least n times.
-Panel b: the resulting reduction in energy evaluations for the run of Fig. 5f,
+Panel b: the resulting reduction in energy evaluations for the run of Fig. 4f,
 whose dilution term is the only one that scales with M. The two marked points
 are the M used in this work and the M that makes full replacement near certain.
 

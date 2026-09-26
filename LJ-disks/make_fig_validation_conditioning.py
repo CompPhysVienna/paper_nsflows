@@ -34,7 +34,7 @@ PRINT_SCALE = ps.PRINT_SCALE
 # Paths are resolved against this file, so the script runs from any directory.
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "..", "data", "lj", "K10000", "L2.9")
-FLOW_RUN = os.path.join(DATA, "runs", "CA_P2e4_250os")      # the run of Fig. 5f
+FLOW_RUN = os.path.join(DATA, "runs", "CA_P2e4_250os")      # the run of Fig. 4f
 COND = os.path.join(DATA, "conditioning_efficiency")
 OUT = os.path.join(HERE, "figures", "fig_validation_conditioning")
 

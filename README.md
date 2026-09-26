@@ -12,13 +12,14 @@ constrained-prior sampling step is performed by a normalizing flow.
 | Figure | Produced by |
 |---|---|
 | 1 | [`numerical_experiments/make_fig_landscapes.py`](numerical_experiments/make_fig_landscapes.py) |
-| 2, 3, 4, 5, 7 | [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) |
-| 6 | [`numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py`](numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py) |
-| 8 | [`numerical_experiments/make_fig_concepts_internal_complexity.py`](numerical_experiments/make_fig_concepts_internal_complexity.py) |
-| S1–S5, Table S2 | [`supplementary/scripts/`](supplementary/scripts) |
+| 2, 4, 6 | [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) |
+| 3 | [`LJ-disks/make_fig_validation_conditioning.py`](LJ-disks/make_fig_validation_conditioning.py) |
+| 5 | [`numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py`](numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py) |
+| 7 | [`numerical_experiments/make_fig_concepts_internal_complexity.py`](numerical_experiments/make_fig_concepts_internal_complexity.py) |
+| S1–S7, Table S2 | [`supplementary/scripts/`](supplementary/scripts) |
 
 All of them read data included here, so every figure rebuilds from a fresh clone
-without re-running any simulation. The runs behind Figures 4 and 5 can also be
+without re-running any simulation. The runs behind Figures 3 and 4 can also be
 reproduced, see [Examples](#examples) below.
 
 ## Requirements
@@ -193,7 +194,7 @@ itself, and the notebook says so rather than failing.
 [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb)
 reads. Only the files the figures need are included, not the full runs.
 
-Six of them are the nested sampling runs compared in Figure 5 of the paper, the
+Six of them are the nested sampling runs compared in Figure 4 of the paper, the
 time decomposition of successive pool generations, split into network training
 and pool generation. They all start from the same initial live
 set and run for the same number of nested sampling iterations, and differ only in
@@ -201,25 +202,29 @@ the learning-rate schedule and the pool size. The folder name states all three:
 
     <scheduler>_P<pool size>_<optimisation steps>os
 
-where the scheduler is One Cycle (`1C`), Cosine Annealing (`CA`), or the two
-combined (`1C-CA`, 1C applied every fifth epoch and CA for the rest, whose folder
-name gives the two step counts separately).
+The folder names are as the runs wrote them and do not quite say what they seem
+to: the `1C_*` runs apply One Cycle **followed by** Cosine Annealing at every
+training stage, and the `1C-CA_*` runs apply that same pair only at every fifth
+training stage, with Cosine Annealing alone in between. The table below and
+Table S2 of the Supplementary Material use the protocol names of the paper; read
+the sub-stage structure of `train_log_*.txt`, not the folder name.
 
-| Folder | Scheduler | Optimisation steps | Pool size |
+| Folder | Protocol | Optimisation steps per stage | Pool size |
 |---|---|---|---|
-| `1C_P1e5_4500os` | 1C | 4500 | 10^5 |
-| `1C_P2e4_1000os` | 1C | 1000 | 2x10^4 |
-| `1C-CA_P1e5_3375-1125os` | 1C + CA | 3375 (1C) + 1125 (CA) | 10^5 |
-| `1C-CA_P2e4_750-250os` | 1C + CA | 750 (1C) + 250 (CA) | 2x10^4 |
-| `CA_P1e5_500os` | CA | 500 | 10^5 |
-| `CA_P2e4_250os` | CA | 250 | 2x10^4 |
+| `1C_P1e5_4500os` | 1C+CA, every stage | 3375 (1C) + 1125 (CA) | 10^5 |
+| `1C_P2e4_1000os` | 1C+CA, every stage | 750 (1C) + 250 (CA) | 2x10^4 |
+| `1C-CA_P1e5_3375-1125os` | 1C+CA/CA(5) | 3375 + 1125 every fifth stage, 1125 (CA) otherwise | 10^5 |
+| `1C-CA_P2e4_750-250os` | 1C+CA/CA(5) | 750 + 250 every fifth stage, 250 (CA) otherwise | 2x10^4 |
+| `CA_P1e5_500os` | CA, every stage | 500 | 10^5 |
+| `CA_P2e4_250os` | CA, every stage | 250 | 2x10^4 |
 
-In Figure 5 the 10^5 runs are the left column and the 2x10^4 runs the right,
-one row per scheduler. The pool size is not only documented here: it can be read
+In Figure 4 the 10^5 runs are the left column and the 2x10^4 runs the right,
+one row per protocol. The pool size is not only documented here: it can be read
 back from column 6 of each run's `output.txt`, which records the number of
 configurations left in the pool.
 
-`data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind Figure 4:
+`data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind panels c
+and d of Figure 3:
 how well the flow performs as a function of the energy bound, as the generation
 efficiency, the identity efficiency and the RESS. The three folders correspond to
 the three curves, and each is produced by one of the notebooks below.
@@ -242,7 +247,7 @@ networks are about 88 MB each and are not included, so the `train = False` branc
 which re-evaluates a finished run instead of training, needs a run you produced
 yourself; only the resulting efficiency curves are provided here.
 
-The phase diagram in the left panel of Figure 7 is not produced from any of this
+The phase diagram in the left panel of Figure 6 is not produced from any of this
 data. It is adapted from Y.-W. Li, *Phase behavior of Lennard-Jones particles in
 two dimensions*, Physical Review E (2020); only the configuration in the right
 panel comes from this work.
@@ -328,7 +333,8 @@ python make_fig_pool_picks.py      # Fig. S2
 python make_fig_hex_configs.py     # Fig. S3
 python make_fig_hex_efficiency.py  # Fig. S4
 python make_fig_dilution.py        # Fig. S5, --simulate checks the coverage model
-python make_fig_lr_schedules.py    # Fig. S6
+python make_fig_dilution_nprop.py  # Fig. S6, walkers moved per dilution iteration
+python make_fig_lr_schedules.py    # Fig. S7
 ```
 
 They read the runs through `common.py`, which resolves them under `data/lj/` by
@@ -337,9 +343,10 @@ shipped per run is what these scripts read: the compressed `output.txt`, the
 generation and training logs, the per-pool `conds_*.pt` and, for the rectangular
 cell, a few configuration snapshots and the final live set.
 
-Ten runs are covered: the six of Figure 5, the flow run behind Figure 3, the
-standard nested sampling reference, the lower-density run of Figure 6, and the
-rectangular-cell run of Figures S3 and S4.
+Nine runs are covered: the six of Figure 4, the standard nested sampling
+reference, the lower-density run of Figure 5, and the rectangular-cell run of
+Figures S3 and S4. Figure 3 is drawn from the run of Figure 4f and the reference,
+so it needs no run of its own.
 
 ### The rectangular cell
 

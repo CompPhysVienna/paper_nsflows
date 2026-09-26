@@ -23,8 +23,8 @@ rows = [
     ("L3.3", r"1:1, $\rho\approx0.73$", r"$2\times10^4$", r"CA (250)"),
     ("hex", r"$2:\sqrt{3}$", r"$2\times10^4$", r"CA (250)"),
 ]
-labels = {"a": "2, 5a", "b": "5b", "c": "5c", "d": "5d", "e": "5e",
-          "f": "3, 5f, 6 (left)", "L3.3": "6 (right)", "hex": "S3, S4"}
+labels = {"a": "2, 4a", "b": "4b", "c": "4c", "d": "4d", "e": "4e",
+          "f": "3, 4f, 5 (left)", "L3.3": "5 (right)", "hex": "S3, S4"}
 
 
 def sci(x):

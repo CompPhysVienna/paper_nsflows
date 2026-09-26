@@ -26,8 +26,8 @@ numerical_experiments/
 │
 │   # --- figures ---
 ├── make_fig_landscapes.py                             # Figure 1
-├── make_fig_internal_complexity_two_density_efficiency.py  # Figure 6
-├── make_fig_concepts_internal_complexity.py            # Figure 8, self-contained
+├── make_fig_internal_complexity_two_density_efficiency.py  # Figure 5
+├── make_fig_concepts_internal_complexity.py            # Figure 7, self-contained
 │
 └── generate_data/               # all data-generation scripts; needs the `numexp` extra
     ├── output/                 # regenerated .npz + diagnostic PNGs land here (gitignored)
@@ -54,7 +54,7 @@ from `numerical_experiments/` (as `run_all.sh` does) or as
 
 
 `[RAW]` marks `internal_complexity.py`, which reads NS run directories
-(`generation_log.zip`, `U_max.zip`, `samples.zip`). The two runs behind Figure 6
+(`generation_log.zip`, `U_max.zip`, `samples.zip`). The two runs behind Figure 5
 are bundled under `../data/numerical_experiments/runs/<label>/`, trimmed to the
 snapshots the script actually touches: the 45 generation events plus the final
 live set used for the E_IS proxy, 46 of 999, so 23 MB per run rather than
