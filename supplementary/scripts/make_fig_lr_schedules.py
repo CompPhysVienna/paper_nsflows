@@ -23,11 +23,15 @@ from common import ps
 
 U_TARGET = 30.0
 
+# key, label, colour, linestyle, plotting stride. The RESS is recorded once per
+# epoch, and the long protocols run for 167 epochs against 28 for the short ones;
+# plotted in full their curve is a noise band that hides the short one, so panel b
+# shows every stride-th epoch. The star still marks the true best over all epochs.
 RUNS = [
-    ("a", "1C+CA (3375+1125)", "C0", "-"),
-    ("b", "1C+CA (750+250)", "C0", "--"),
-    ("e", "CA (500)", "C1", "-"),
-    ("f", "CA (250)", "C1", "--"),
+    ("a", "1C+CA (3375+1125)", "C0", "-", 8),
+    ("b", "1C+CA (750+250)", "C0", "--", 2),
+    ("e", "CA (500)", "C1", "-", 2),
+    ("f", "CA (250)", "C1", "--", 1),
 ]
 
 
@@ -66,13 +70,17 @@ ps.set_style()
 fig_w, fig_h = ps.figsize_for_target_width(ps.NEURIPS_LINEWIDTH_IN, ps.PRINT_SCALE, aspect=0.39)
 fig, axes = plt.subplots(1, 2, figsize=(fig_w, fig_h), constrained_layout=True)
 
-for key, label, color, ls in RUNS:
+for key, label, color, ls, stride in RUNS:
     run = cm.run_dir(key)
     count, u = closest_stage(run, U_TARGET)
     steps, lr, ress = train_logs(run, count)
     axes[0].plot(steps, lr, color=color, ls=ls, label=label)
-    axes[1].plot(steps, ress, color=color, ls=ls, marker="o", ms=3, mfc="none", label=label)
-    best = np.argmax(ress)
+    best = int(np.argmax(ress))
+    # Thin the curve, but always keep the best epoch and the last one, so that the
+    # star marking the kept parameters sits on the line rather than beside it.
+    keep = sorted({*range(0, len(ress), stride), best, len(ress) - 1})
+    axes[1].plot(steps[keep], ress[keep], color=color, ls=ls, marker="o",
+                 ms=3, mfc="none", label=label)
     axes[1].plot(steps[best], ress[best], "*", color=color, ms=10, zorder=5)
     print(f"{key}: training stage {count}, U_train = {u:.2f}, {int(steps[-1])} steps, "
           f"best validation RESS {ress[best]:.3f} at step {int(steps[best])}")
