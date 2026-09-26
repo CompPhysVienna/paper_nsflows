@@ -140,9 +140,10 @@ the system the paper's results are for. The two state points are selected by the
 | [`LJ-disks/nsflows.ipynb`](LJ-disks/nsflows.ipynb) | Nested sampling with the flow |
 | [`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) | Flow efficiency against the energy bound, conditioned on it |
 | [`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) | The same, retraining at each live set instead |
-| [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) | Figures 2, 3, 4, 5 and 7, from the data included here |
+| [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) | Figures 2, 4 and 6, from the data included here |
+| [`LJ-disks/make_fig_validation_conditioning.py`](LJ-disks/make_fig_validation_conditioning.py) | Figure 3, from the data included here |
 
-Only the last one is quick. The other four are full runs: the flow-based nested
+Only the last two are quick. The other four are full runs: the flow-based nested
 sampling took between 8 and 32 hours per run on a GPU, and the two efficiency
 scans take hours per live set. Reduce `max_ns_iterations`, or `live_sets` and
 `total_steps`, to see them work before committing to a full run.
@@ -288,8 +289,8 @@ produced by the notebooks. Run them directly; each writes a PDF and a PNG into
 | Script | Figure | Reads |
 |---|---|---|
 | `make_fig_landscapes.py` | 1 | `coupling_mi.npz`, `gw_degeneracies.npz`, `hessian_spectra.npz`, `lj_symmetries.npz` |
-| `make_fig_internal_complexity_two_density_efficiency.py` | 6 | `internal_complexity_L2.9.npz`, `internal_complexity_L3.3.npz` |
-| `make_fig_concepts_internal_complexity.py` | 8 | nothing, it is self-contained |
+| `make_fig_internal_complexity_two_density_efficiency.py` | 5 | `internal_complexity_L2.9.npz`, `internal_complexity_L3.3.npz` |
+| `make_fig_concepts_internal_complexity.py` | 7 | nothing, it is self-contained |
 
 ```bash
 cd numerical_experiments
@@ -371,7 +372,8 @@ nsflows/
 ├── systems/              # test systems: Gaussians, uniforms, Einstein crystal,
 │                         #   Lennard-Jones, 2D test systems
 ├── transformations/      # coordinate transformations and normalization
-└── tools/                # observables, plotting style, utilities
+└── tools/                # observables, plotting style, run readers and
+                          #   energy budget (runs.py), utilities
 ```
 
 ## Citation
