@@ -26,10 +26,10 @@ RUN_ROOT = Path(os.environ.get("NSFLOWS_RUN_ROOT", REPO / "data" / "lj"))
 
 # Runs behind the figures of the main text (panel letters of Fig. 4) and of this SM.
 RUNS = {
-    "a": "K10000/L2.9/runs/1C_P1e5_4500os",
-    "b": "K10000/L2.9/runs/1C_P2e4_1000os",
-    "c": "K10000/L2.9/runs/1C-CA_P1e5_3375-1125os",
-    "d": "K10000/L2.9/runs/1C-CA_P2e4_750-250os",
+    "a": "K10000/L2.9/runs/1C+CA_P1e5_3375-1125os",
+    "b": "K10000/L2.9/runs/1C+CA_P2e4_750-250os",
+    "c": "K10000/L2.9/runs/1C+CA-CA5_P1e5_3375-1125os",
+    "d": "K10000/L2.9/runs/1C+CA-CA5_P2e4_750-250os",
     "e": "K10000/L2.9/runs/CA_P1e5_500os",
     "f": "K10000/L2.9/runs/CA_P2e4_250os",
     "L3.3": "K10000/L3.3/runs/CA_P2e4_250os",

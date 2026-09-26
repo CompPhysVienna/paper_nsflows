@@ -200,21 +200,22 @@ and pool generation. They all start from the same initial live
 set and run for the same number of nested sampling iterations, and differ only in
 the learning-rate schedule and the pool size. The folder name states all three:
 
-    <scheduler>_P<pool size>_<optimisation steps>os
+    <protocol>_P<pool size>_<optimisation steps>os
 
-The folder names are as the runs wrote them and do not quite say what they seem
-to: the `1C_*` runs apply One Cycle **followed by** Cosine Annealing at every
-training stage, and the `1C-CA_*` runs apply that same pair only at every fifth
-training stage, with Cosine Annealing alone in between. The table below and
-Table S2 of the Supplementary Material use the protocol names of the paper; read
-the sub-stage structure of `train_log_*.txt`, not the folder name.
+where the protocol is named as in the paper and in Table S2 of the Supplementary
+Material: `1C+CA` applies One Cycle **followed by** Cosine Annealing at every
+training stage, `1C+CA-CA5` applies that same pair only at every fifth training
+stage with Cosine Annealing alone in between (written `1C+CA/CA(5)` in the
+paper), and `CA` applies Cosine Annealing at every stage. The step counts in the
+folder name are those of one full `1C+CA` stage. The same structure can be read
+back from the sub-stages of `train_log_*.txt`.
 
 | Folder | Protocol | Optimisation steps per stage | Pool size |
 |---|---|---|---|
-| `1C_P1e5_4500os` | 1C+CA, every stage | 3375 (1C) + 1125 (CA) | 10^5 |
-| `1C_P2e4_1000os` | 1C+CA, every stage | 750 (1C) + 250 (CA) | 2x10^4 |
-| `1C-CA_P1e5_3375-1125os` | 1C+CA/CA(5) | 3375 + 1125 every fifth stage, 1125 (CA) otherwise | 10^5 |
-| `1C-CA_P2e4_750-250os` | 1C+CA/CA(5) | 750 + 250 every fifth stage, 250 (CA) otherwise | 2x10^4 |
+| `1C+CA_P1e5_3375-1125os` | 1C+CA, every stage | 3375 (1C) + 1125 (CA) | 10^5 |
+| `1C+CA_P2e4_750-250os` | 1C+CA, every stage | 750 (1C) + 250 (CA) | 2x10^4 |
+| `1C+CA-CA5_P1e5_3375-1125os` | 1C+CA/CA(5) | 3375 + 1125 every fifth stage, 1125 (CA) otherwise | 10^5 |
+| `1C+CA-CA5_P2e4_750-250os` | 1C+CA/CA(5) | 750 + 250 every fifth stage, 250 (CA) otherwise | 2x10^4 |
 | `CA_P1e5_500os` | CA, every stage | 500 | 10^5 |
 | `CA_P2e4_250os` | CA, every stage | 250 | 2x10^4 |
 
