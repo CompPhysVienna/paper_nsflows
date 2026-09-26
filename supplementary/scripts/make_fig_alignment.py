@@ -9,7 +9,6 @@ d) the same live set after alignment.
 """
 
 import numpy as np
-import torch
 import matplotlib.pyplot as plt
 
 
