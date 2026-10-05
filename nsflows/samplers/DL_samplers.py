@@ -216,10 +216,24 @@ class nflows_propagator(base_sampler):
                     log_w = (log_prob_zx - log_prob_z + logJ_zx).squeeze(-1)
                     avg_ress += ress(log_w)
 
-                    # Reweighting from Williams et al
-                    log_u = torch.log(torch.rand(log_w.shape, device=self.device))
-                    log_w = torch.nan_to_num(log_w, neginf=-1e30)
-                    indx_will = torch.where((log_w - torch.max(log_w)) >= log_u)[0]
+                    # Reweighting from Williams et al.
+                    # Proposals above the energy bound have zero weight, and nan_to_num
+                    # collapses them all onto the same sentinel. When the whole batch is
+                    # above the bound the shifted weights are therefore identically zero
+                    # and the comparison below would accept every one of them, filling
+                    # the pool with configurations that violate the bound and reporting
+                    # an acceptance of one. Restrict the comparison to the proposals that
+                    # can be accepted at all, and reject the batch outright when there
+                    # are none.
+                    admissible = torch.isfinite(log_w)
+                    if admissible.any():
+                        log_u = torch.log(torch.rand(log_w.shape, device=self.device))
+                        log_w = torch.nan_to_num(log_w, neginf=-1e30)
+                        indx_will = torch.where(
+                            admissible & ((log_w - torch.max(log_w[admissible])) >= log_u)
+                        )[0]
+                    else:
+                        indx_will = torch.empty(0, dtype=torch.long, device=self.device)
                     target_x_resampled = target_x[indx_will]
                     valid_samples = target_x_resampled.shape[0]
                     n_generated += valid_samples
