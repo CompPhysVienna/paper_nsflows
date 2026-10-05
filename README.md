@@ -22,8 +22,19 @@ constrained-prior sampling step is performed by a normalizing flow.
 
 All of them read data included here, so every figure in the paper rebuilds from a
 fresh clone without re-running any simulation, and reproduces the published figure
-pixel for pixel. The runs themselves can also be reproduced, see
-[Examples](#examples) below.
+pixel for pixel.
+
+What is provided is also sufficient to reproduce the results by running the
+simulations again, up to statistical noise. Every run directory carries the
+parameter record it was written with, and the initial live sets all runs start
+from are included, so any run in the paper can be launched as it was. Nothing is
+seeded and GPU reductions are not deterministic, so a repetition reproduces a
+result to within the run-to-run spread rather than exactly; the Supplementary
+Material measures that spread from ten repetitions of the run of Figure 4f, and
+it is 4.7% in total energy evaluations and 11.6% in generation attempts.
+
+The simulation output of the particular runs used in the paper, about 20 GB, is
+available from the authors on request. It is not needed for any of the above.
 
 ## Requirements
 
@@ -197,8 +208,7 @@ itself, and the notebook says so rather than failing.
 #### Runs behind the paper figures
 
 `data/lj/K10000/L2.9/runs/` holds the runs the figure scripts read. Only the files
-the figures need are included, not the full runs; the complete runs are about
-20 GB and are available from the authors on request.
+the figures need are included, not the full runs.
 
 Six of them are the nested sampling runs compared in Figure 4 of the paper, the
 time decomposition of successive pool generations, split into network training
