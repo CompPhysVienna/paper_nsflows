@@ -7,7 +7,7 @@ from tqdm import tqdm
 from nsflows.samplers.base import base_sampler
 from nsflows.network.trainer import Trainer
 
-from nsflows.tools.util import remove_from_tensor, ress
+from nsflows.tools.util import ress
 
 class nflows_propagator(base_sampler):
     
@@ -27,6 +27,7 @@ class nflows_propagator(base_sampler):
         self.max_generation_attempts = max_generation_attempts
         self.empty_pool = True
         self.pool_size = None
+        self.pool_cursor = 0
         self.max_sample_size = max_sample_size
 
         self.training_counter = 0
@@ -179,6 +180,7 @@ class nflows_propagator(base_sampler):
         
         self.pool = []
         self.pool_biased = []
+        self.pool_cursor = 0
 
         with open(os.path.join(outputdir, f"generation_log_{self.generating_counter:04d}.txt"), "w+") as f:
             f.write(f"# Generation {self.generating_counter}\n\n")
@@ -269,7 +271,11 @@ class nflows_propagator(base_sampler):
         if save_biased_pool:
             self.pool_biased = torch.cat(self.pool_biased, dim=0)[:n_pool]
         self.pool = torch.cat(self.pool, dim=0)[:n_pool]
+        # Shuffled once here so that sample_space can consume it in order and still
+        # draw from it uniformly without replacement.
+        self.pool = self.pool[torch.randperm(self.pool.shape[0], device=self.device)]
 
+        self.pool_cursor = 0
         self.pool_size = self.pool.shape[0]
         self.empty_pool = False
 
@@ -300,45 +306,49 @@ class nflows_propagator(base_sampler):
         x = []
         u_x = []
         n_confs = 0
-        attempt = 0             
-        while self.pool.shape[0] >= N:
-            
-            # randomly chooses a sample from the pool
-            indices = np.random.choice(self.pool.shape[0], N, replace = False)
-            xp = self.pool[indices].clone()
-            u_xp = self.flow.posterior.energy(xp).squeeze()
-                
-            # Checks if the energy of the new point is lower than the boundary. 
+        attempt = 0
+        # The pool is shuffled when it is generated, so taking the next N entries in
+        # order draws from it uniformly without replacement. Advancing a cursor keeps
+        # each draw O(N); deleting the drawn rows instead rebuilt the whole pool on
+        # every draw, which over one pool costs work quadratic in its size.
+        while self.pool.shape[0] - self.pool_cursor >= N:
+
+            xp = self.pool[self.pool_cursor:self.pool_cursor + N].clone()
+            self.pool_cursor += N
+            # squeeze(-1) rather than squeeze(): for N = 1 the latter drops the batch
+            # dimension as well, and the boolean mask below then adds a spurious axis.
+            u_xp = self.flow.posterior.energy(xp).squeeze(-1)
+
+            # Checks if the energy of the new point is lower than the boundary.
             # If it is accepts else rejects.
             mask = u_xp < energy_bound
-            n_confs += mask.sum()
+            n_confs += int(mask.sum())
             x.append(xp[mask])
             u_x.append(u_xp[mask])
 
-            # delete the point from the pool either ways
-            self.pool = remove_from_tensor(self.pool, indices)
-            
             attempt += 1
             if n_confs >= N:
                 break
 
-        if self.pool.shape[0] < N and n_confs < N:
-            
-            x = self.x0
-            u_x = self.flow.posterior.energy(x)
-            
+        if self.pool.shape[0] - self.pool_cursor < N and n_confs < N:
+
+            # The pool ran out before it could supply a replacement. Report that,
+            # rather than handing back a copy of a live point that was never sampled:
+            # the caller drops the iteration instead of spending a nested-sampling
+            # step, and the prior volume is not contracted for a step not taken.
             self.average_attempts /= self.n_sample_space
-            
+
             self.empty_pool = True
             self.pool_size = None
-        
-        else:
-            x = torch.cat(x, dim=0)
-            u_x = torch.cat(u_x, dim=0)
 
-            self.average_attempts += attempt
-            self.n_sample_space +=1
+            return None, None, attempt
 
-            self.pool_size = self.pool.shape[0]
+        x = torch.cat(x, dim=0)
+        u_x = torch.cat(u_x, dim=0)
+
+        self.average_attempts += attempt
+        self.n_sample_space +=1
+
+        self.pool_size = self.pool.shape[0] - self.pool_cursor
 
         return x[:N], u_x[:N], attempt

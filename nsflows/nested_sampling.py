@@ -116,11 +116,21 @@ def nested_sampling(K : int,
 
     try:
 
-        # This is the iterative loop for the nested sampling
-        for iter in range(max_iters):
-            
-            if iter == turn_on_nf:
-                # Check that this is done once!
+        # This is the iterative loop for the nested sampling.
+        #
+        # What is counted is nested-sampling iterations, not passes through the loop.
+        # A pass that finds the pool exhausted replaces no walker, so it is not an
+        # iteration: ``iter`` stays where it is and the pass is taken again once the
+        # pool has been refilled. Everything indexed by ``iter`` therefore stays dense.
+        iter = 0
+        nf_turned_on = False
+        skipped_passes = 0
+        while iter < max_iters:
+
+            # Guarded by a flag rather than by equality, since a skipped pass leaves
+            # ``iter`` unchanged and would otherwise switch the flow on twice.
+            if not nf_turned_on and iter >= turn_on_nf:
+                nf_turned_on = True
                 normalizing_flows = True
                 st_ns_timing_e = datetime.datetime.now()
                 st_ns_timings.append((st_ns_timing_e - st_ns_timing_s).total_seconds())
@@ -225,12 +235,9 @@ def nested_sampling(K : int,
 
                         nf_ns_timing_s = datetime.datetime.now()
 
-                clone_indx = np.random.choice(particles_to_choose_from)
+                # When the pool is not empty then sample one configuration at a time via Normalizing flow
+                x_new, u_new, n_draws = nf_propagator.sample_space(N = 1, energy_bound = U_max)
 
-                # When the pool is not empty then sample one configuration at a time via Normalizing flow 
-                nf_propagator.x0 = samples[clone_indx].unsqueeze(0)
-                samples[U_argmax], U_samples[U_argmax], acc[iter] = nf_propagator.sample_space(N = 1, energy_bound = U_max)
-                
                 if nf_propagator.empty_pool:
                     if alternate_std_ns_iters > 0:
                         normalizing_flows = False
@@ -240,7 +247,26 @@ def nested_sampling(K : int,
                         st_ns_timings.append(0.)
                     nf_ns_timing_e = datetime.datetime.now()
                     nf_ns_timings.append((nf_ns_timing_e - nf_ns_timing_s).total_seconds())
-                    
+
+                if x_new is None:
+                    # The pool ran out before supplying a replacement. No walker was
+                    # replaced, so no nested-sampling step was taken: leave the counter
+                    # alone and take this step again, after the dilution stretch if
+                    # there is one and otherwise once the pool has been refilled.
+                    #
+                    # Refilling always yields a usable pool, so a second exhaustion
+                    # without an iteration in between would mean the sampler is not
+                    # making progress. Stop rather than spin.
+                    skipped_passes += 1
+                    if skipped_passes > 1:
+                        raise RuntimeError(
+                            f"the pool was exhausted twice at iteration {iter} without a "
+                            "nested-sampling step in between; the sampler is not progressing"
+                        )
+                    continue
+
+                samples[U_argmax], U_samples[U_argmax], acc[iter] = x_new, u_new, n_draws
+
             # Standard Nested Sampling algorithm       
             else:
                 std_ns_iter += 1
@@ -305,7 +331,11 @@ def nested_sampling(K : int,
                 if (iter+1) > isavesamp and (iter + 1) % isavesamp == 0:
                     torch.save(samples, os.path.join(outputdir, f"samples_{(iter+1):012d}.pt"))
                     torch.save(U_max, os.path.join(outputdir, f"U_max_{(iter+1):012d}.pt"))
-        
+
+            # A walker was replaced, so this pass was an iteration.
+            iter += 1
+            skipped_passes = 0
+
         # Stop timer
         run_end_time = datetime.datetime.now()
 
