@@ -29,7 +29,6 @@ class nflows_propagator(base_sampler):
         self.pool_size = None
         self.max_sample_size = max_sample_size
 
-        self.full_training_counter = 0
         self.training_counter = 0
         self.generating_counter = 0
 
@@ -58,13 +57,17 @@ class nflows_propagator(base_sampler):
         if fine_tune:
             print("\nFine-tune training: executing last training stage only.")
 
-            # "{save_best}_flow_parameters_{self.full_training_counter:04d}_{(len(training_protocol) - 2):04d}.pt"
-            # is needed to load parameters of the last full training up to the last training step of the protocol
-            # so if one has 3 protocols, fine tune performs only number 3 and loads parameters after last full training until step 2
-            if training_protocol[-2]["save_best"]:
-                self.load_parameters(params_path = os.path.join(outputdir, f"best_flow_parameters_{self.full_training_counter:04d}_{(len(training_protocol) - 2):04d}.pt"))
-            else:
-                self.load_parameters(params_path = os.path.join(outputdir, f"flow_parameters_{self.full_training_counter:04d}_{(len(training_protocol) - 2):04d}.pt"))
+            # No parameters are loaded here: fine-tuning continues from the network as
+            # it stands, which is what carrying parameters over between retrainings
+            # means.
+            #
+            # This used to reload the checkpoint of the second-to-last stage of the
+            # last *full* training, indexed by a counter that only advanced when a full
+            # training ran. Every fine-tune between two full trainings therefore
+            # reloaded the same file, discarding both the final stage of that training
+            # and everything the intervening fine-tunes had learned. The end of each
+            # stage already restores the best parameters of that stage (below), so the
+            # network is in the right state without loading anything.
         else:
             print(f"\nFull training: training in {len(training_protocol)} stages")
         metrics = []
@@ -152,8 +155,6 @@ class nflows_propagator(base_sampler):
                 
             print()
 
-        if not fine_tune:
-            self.full_training_counter = self.training_counter
         self.training_counter += 1
         
         return metrics
