@@ -146,18 +146,27 @@ def nested_sampling(K : int,
                             nf_propagator.initialize_weights()
                             fine_tune = False
                             
+                    # The live set enters the training window once per retraining, not once
+                    # per attempt at filling the pool: the loop below may run several times
+                    # for a single live set, and appending on every pass would push
+                    # duplicates of it into the window and evict the earlier live sets.
+                    #
+                    # ``samples`` is never rebound either: the propagators mutate it in
+                    # place, so appending the tensor itself would make every entry of the
+                    # window an alias of the current live set rather than a record of the
+                    # live sets it is meant to hold. Store a snapshot.
+                    data_samples.append(samples.clone())
+                    data_conditions.append(
+                        torch.ones((samples.shape[0], 1), device=nf_propagator.device) * U_max
+                    )
+
                     # Training is performed using the set of live points
-                    # TODO: Check this one, seems unnecessary
                     # This continues the training when max_generation_attempts in nf_propagator is set < inf
                     while nf_propagator.empty_pool:
         
                         if isavesamp > 0:
                             torch.save(samples.squeeze(), os.path.join(outputdir, f"dataset_{nf_propagator.training_counter:04d}.pt"))
                             torch.save(U_max, os.path.join(outputdir, f"conds_{nf_propagator.training_counter:04d}.pt"))
-
-                        data_samples.append(samples)
-                        conditions = torch.ones((samples.shape[0], 1), device=nf_propagator.device)*U_max
-                        data_conditions.append(conditions)
 
                         data_tensor = torch.cat(list(data_samples), dim=0)
                         conditions_tensor = torch.cat(list(data_conditions), dim=0)
