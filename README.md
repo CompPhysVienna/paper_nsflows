@@ -12,15 +12,18 @@ constrained-prior sampling step is performed by a normalizing flow.
 | Figure | Produced by |
 |---|---|
 | 1 | [`numerical_experiments/make_fig_landscapes.py`](numerical_experiments/make_fig_landscapes.py) |
-| 2, 4, 6 | [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) |
+| 2 | [`LJ-disks/make_fig_pools_aligned.py`](LJ-disks/make_fig_pools_aligned.py) |
 | 3 | [`LJ-disks/make_fig_validation_conditioning.py`](LJ-disks/make_fig_validation_conditioning.py) |
+| 4 | [`LJ-disks/make_fig_timings.py`](LJ-disks/make_fig_timings.py) |
 | 5 | [`numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py`](numerical_experiments/make_fig_internal_complexity_two_density_efficiency.py) |
+| 6 | [`LJ-disks/make_fig_phase_diagram.py`](LJ-disks/make_fig_phase_diagram.py) |
 | 7 | [`numerical_experiments/make_fig_concepts_internal_complexity.py`](numerical_experiments/make_fig_concepts_internal_complexity.py) |
-| S1–S7, Table S2 | [`supplementary/scripts/`](supplementary/scripts) |
+| S1–S7, Table S3 | [`supplementary/scripts/`](supplementary/scripts) |
 
-All of them read data included here, so every figure rebuilds from a fresh clone
-without re-running any simulation. The runs behind Figures 3 and 4 can also be
-reproduced, see [Examples](#examples) below.
+All of them read data included here, so every figure in the paper rebuilds from a
+fresh clone without re-running any simulation, and reproduces the published figure
+pixel for pixel. The runs themselves can also be reproduced, see
+[Examples](#examples) below.
 
 ## Requirements
 
@@ -140,12 +143,14 @@ the system the paper's results are for. The two state points are selected by the
 | [`LJ-disks/nsflows.ipynb`](LJ-disks/nsflows.ipynb) | Nested sampling with the flow |
 | [`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) | Flow efficiency against the energy bound, conditioned on it |
 | [`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) | The same, retraining at each live set instead |
-| [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) | Figures 2, 4 and 6, from the data included here |
+| [`LJ-disks/make_fig_pools_aligned.py`](LJ-disks/make_fig_pools_aligned.py) | Figure 2, from the data included here |
 | [`LJ-disks/make_fig_validation_conditioning.py`](LJ-disks/make_fig_validation_conditioning.py) | Figure 3, from the data included here |
+| [`LJ-disks/make_fig_timings.py`](LJ-disks/make_fig_timings.py) | Figure 4, from the data included here |
+| [`LJ-disks/make_fig_phase_diagram.py`](LJ-disks/make_fig_phase_diagram.py) | Figure 6, from the data included here |
 
-Only the last two are quick. The other four are full runs: the flow-based nested
-sampling took between 8 and 32 hours per run on a GPU, and the two efficiency
-scans take hours per live set. Reduce `max_ns_iterations`, or `live_sets` and
+Only the last four are quick, and they write into `LJ-disks/figures/`. The others
+are full runs: the flow-based nested sampling took between 8 and 33 hours per run
+on a GPU, and the two efficiency scans take hours per live set. Reduce `max_ns_iterations`, or `live_sets` and
 `total_steps`, to see them work before committing to a full run.
 
 ### Output of a run
@@ -191,9 +196,9 @@ itself, and the notebook says so rather than failing.
 
 #### Runs behind the paper figures
 
-`data/lj/K10000/L2.9/runs/` holds the runs that
-[`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb)
-reads. Only the files the figures need are included, not the full runs.
+`data/lj/K10000/L2.9/runs/` holds the runs the figure scripts read. Only the files
+the figures need are included, not the full runs; the complete runs are about
+20 GB and are available from the authors on request.
 
 Six of them are the nested sampling runs compared in Figure 4 of the paper, the
 time decomposition of successive pool generations, split into network training
@@ -203,7 +208,7 @@ the learning-rate schedule and the pool size. The folder name states all three:
 
     <protocol>_P<pool size>_<optimisation steps>os
 
-where the protocol is named as in the paper and in Table S2 of the Supplementary
+where the protocol is named as in the paper and in Table S3 of the Supplementary
 Material: `1C+CA` applies One Cycle **followed by** Cosine Annealing at every
 training stage, `1C+CA-CA5` applies that same pair only at every fifth training
 stage with Cosine Annealing alone in between (written `1C+CA/CA(5)` in the
@@ -225,17 +230,33 @@ one row per protocol. The pool size is not only documented here: it can be read
 back from column 6 of each run's `output.txt`, which records the number of
 configurations left in the pool.
 
-`data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind panels c
-and d of Figure 3:
-how well the flow performs as a function of the energy bound, as the generation
-efficiency, the identity efficiency and the RESS. The three folders correspond to
-the three curves, and each is produced by one of the notebooks below.
+`data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind panels c and
+d of Figure 3: how well the flow generates below the energy bound it was trained
+at, for three training strategies, two of them at two window widths. Each of the
+five folders holds ten independently trained networks, each generating ten pools
+of 10^4 configurations.
 
-| Folder | Produced by |
-|---|---|
-| `conditioning_window_10K` | `multiple_live_sets_conditioning.ipynb` |
-| `training_window_10K` | `multiple_live_sets_training.ipynb` with `collate_dataset = False` |
-| `training_window_10K_collated_dataset` | `multiple_live_sets_training.ipynb` with `collate_dataset = True` |
+| Folder | Training strategy | Live sets apart |
+|---|---|---|
+| `training_window_10K` | the target live set alone | — |
+| `training_window_10K_step11000` | three live sets pooled, unconditioned | 1.1x10^4 iterations |
+| `conditioning_window_10K_step11000` | three live sets, conditioned on the bound | 1.1x10^4 iterations |
+| `training_window_10K_step24000` | three live sets pooled, unconditioned | 2.4x10^4 iterations |
+| `conditioning_window_10K_step24000` | three live sets, conditioned on the bound | 2.4x10^4 iterations |
+
+The two spacings are the retraining frequencies of the small- and large-pool runs
+of Figure 4. The single-live-set strategy has no window, so it appears once.
+
+Each folder holds `per_generation.txt`, one row per generation with the target,
+the network, the draw and its seed, and `per_replica.txt`, one row per network.
+`make_fig_validation_conditioning.py` reads the per-generation values because the
+error bars are the spread over networks with the generation noise removed, which
+needs both levels; see the `load` function there for the decomposition.
+
+The conditioned and unconditioned arms are produced by
+`multiple_live_sets_conditioning.ipynb` and `multiple_live_sets_training.ipynb`
+respectively, the latter with `collate_dataset = True` for the pooled arms and
+`False` for the single live set, with `live_set_step` set to the spacing.
 
 [`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) and
 [`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) train a flow
@@ -323,13 +344,13 @@ to the shipped `.npz`. The two runs are:
 
 ### Supplementary Material
 
-`supplementary/scripts/` regenerates the Supplementary figures and Table S2.
+`supplementary/scripts/` regenerates the Supplementary figures and Table S3.
 Each script writes into `supplementary/figures/`, and `make_table_runs.py` into
 `supplementary/tables/`; both are regenerated, so neither is tracked.
 
 ```bash
 cd supplementary/scripts
-python make_table_runs.py          # Table S2, the energy budget of every run
+python make_table_runs.py          # Table S3, the energy budget of every run
 python make_fig_alignment.py       # Fig. S1
 python make_fig_pool_picks.py      # Fig. S2
 python make_fig_hex_configs.py     # Fig. S3
@@ -362,6 +383,26 @@ and the augmentation group is unchanged.
 [`LJ-disks/nsflows_rect_cell.ipynb`](LJ-disks/nsflows_rect_cell.ipynb) is the
 notebook that produced that run.
 
+## Tests
+
+`pytest` covers the parts of the sampler whose failure modes are silent --- a
+wrong number still comes out, only a different one.
+
+```bash
+pip install pytest
+pytest
+```
+
+Twenty-seven tests, about a second, no GPU and no data beyond what the package
+builds itself. They assert that the training window holds distinct live sets
+under distinct energy bounds; that an exhausted pool is reported rather than
+answered with a configuration that was never drawn from it; that a generation
+batch lying entirely above the bound is rejected instead of accepted whole; that
+fine-tuning continues from the current network; that the Lennard-Jones pair sums
+exclude the diagonal and nothing else; and that an orthorhombic cell keeps its
+density, its cutoff, its augmentation group and its per-axis Monte Carlo step,
+while a square one is untouched.
+
 ## Package layout
 
 ```
@@ -374,6 +415,8 @@ nsflows/
 ├── transformations/      # coordinate transformations and normalization
 └── tools/                # observables, plotting style, run readers and
                           #   energy budget (runs.py), utilities
+
+tests/                    # pytest suite, see above
 ```
 
 ## Citation
