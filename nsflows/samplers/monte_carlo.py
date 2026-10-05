@@ -3,6 +3,32 @@ import torch
 
 from nsflows.samplers.base import base_sampler
 
+def resolve_step_size(system, step_size, dimensions, device):
+    """The maximum displacement along each direction, as a vector.
+
+    A scalar is read as a fraction of the longest box side and applied as that
+    same fraction of every side. In a square cell that leaves it unchanged; in an
+    orthorhombic one it keeps the move isotropic relative to the cell rather than
+    in absolute length. A system with no simulation cell has no anisotropy to
+    match, so the scalar is used as it stands. A sequence is taken verbatim, one
+    entry per direction.
+
+    Always a vector, so that the shape of the step does not depend on the system.
+    """
+    if np.isscalar(step_size):
+        box_length = getattr(system, "box_length", None)
+        if box_length is None:
+            return torch.full((dimensions,), float(step_size), dtype=torch.float32,
+                              device=device)
+        box_length = torch.as_tensor(box_length, dtype=torch.float32, device=device)
+        return float(step_size) * box_length / torch.max(box_length)
+
+    step = torch.as_tensor(step_size, dtype=torch.float32, device=device)
+    if step.shape != (dimensions,):
+        raise ValueError(f"step_size must be a scalar or have shape ({dimensions},)")
+    return step
+
+
 class rejection_monte_carlo(base_sampler):
     
     """
@@ -24,17 +50,7 @@ class rejection_monte_carlo(base_sampler):
         self.dofs = system.dofs  # Degrees of freedom (n_particles * dimensions).
         self.device = system.device  # Torch device (CPU/GPU).
 
-        # Maximum displacement per step, kept per axis. A scalar is scaled by
-        # L_alpha / max(L), so in an orthorhombic cell each axis is explored in
-        # proportion to its length; in a square cell every factor is 1 and the
-        # behaviour is unchanged.
-        if np.isscalar(step_size):
-            self.step_size = (float(step_size) * self.system.box_length
-                              / torch.max(self.system.box_length))
-        else:
-            self.step_size = torch.as_tensor(step_size, dtype=torch.float32, device=self.device)
-            assert self.step_size.shape == (self.dimensions,), \
-                f"step_size must be a scalar or have shape ({self.dimensions},)"
+        self.step_size = resolve_step_size(system, step_size, self.dimensions, self.device)
         self.n_cycles = n_cycles  # Number of cycles for sampling.
         
         self.x0 = None  # Stores the initial configuration.
