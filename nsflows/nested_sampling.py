@@ -18,7 +18,7 @@ def nested_sampling(K : int,
                     alternate_std_ns_iters : int = 0, 
                     n_pool : int = 10000, 
                     load_nf_parameters : bool = False, 
-                    reinitialize_nf_parameters : bool = True,
+                    reinitialize_nf_parameters : bool = False,
                     itrain : int = 0,
                     cumulate_n_dataset : int = 1,
                     training_protocol : list = [{"w_xz" : 1, 
@@ -147,7 +147,12 @@ def nested_sampling(K : int,
                 # - Train the network on the current set of live points
                 # - Generate a new pool of configuration from which to get samples
                 if nf_propagator.empty_pool:
-                    # (Re)Initialize weights and biases
+                    # (Re)Initialize weights and biases.
+                    #
+                    # reinitialize_nf_parameters discards the network before every
+                    # retraining. itrain does so every itrain-th retraining and
+                    # fine-tunes in between. Leaving both off carries the parameters
+                    # across the whole run, which is the default.
                     if reinitialize_nf_parameters:
                         nf_propagator.initialize_weights()
                     elif itrain > 0:
