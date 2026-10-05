@@ -1,0 +1,72 @@
+{
+    "timestamp": "2026-09-27T20:13:43.790338",
+    "run": "f",
+    "system": {
+        "n_particles": 8,
+        "dimensions": 2,
+        "box_length": 2.9,
+        "aspect_ratio": null,
+        "cutin": 0.8,
+        "rho": 0.9512485136741974,
+        "device": "cuda"
+    },
+    "nested_sampling": {
+        "init_samples_filepath": "/leonardo/home/userexternal/acoretti/Projects/NFsNestedSampling/nested_sampling_normalizing_flows/data/lj/conditioned/K10000/L2.9/samples_1000.pt",
+        "init_U_max": 2540.8984375,
+        "live_samples": 10000,
+        "max_ns_iterations": 500000,
+        "n_propagate": 1000,
+        "update_step": true,
+        "turn_on_nf": 100,
+        "alternate_std_ns_iters": 100,
+        "n_pool": 20000,
+        "load_nf_parameters": false,
+        "itrain": 0,
+        "reinitialize_nf_parameters": false,
+        "cumulate_n_dataset": 3,
+        "iprint": 1,
+        "isavesamp": 500,
+        "save_biased_pool": true
+    },
+    "propagators": {
+        "rejection_monte_carlo": {
+            "n_cycles": 100,
+            "step_size": 1.2,
+            "transform": true
+        },
+        "nflows_propagator": {
+            "conditioned": true,
+            "transform": true,
+            "max_sample_size": 20000,
+            "max_generation_attempts": null
+        }
+    },
+    "network": {
+        "conditioned": true,
+        "n_blocks": 28,
+        "n_bins": 12,
+        "circular_shifts": true,
+        "n_parameters": 22984752
+    },
+    "learning_rates": {
+        "start_lr": 1e-05,
+        "mid_lr": 0.0001,
+        "max_lr": 0.00025,
+        "end_lr": 1e-06
+    },
+    "training_protocol": [
+        {
+            "w_xz": 1,
+            "w_zx": 0,
+            "batch_size": 1000,
+            "conds_per_batch": -1,
+            "total_steps": 250,
+            "start_lr": 0.0001,
+            "end_lr": 1e-06,
+            "max_lr": null,
+            "save_best": true,
+            "optimizer": "Adam",
+            "scheduler": "CosineAnnealingLR"
+        }
+    ]
+}

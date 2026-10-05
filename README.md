@@ -230,6 +230,16 @@ one row per protocol. The pool size is not only documented here: it can be read
 back from column 6 of each run's `output.txt`, which records the number of
 configurations left in the pool.
 
+Each run directory also carries the `simulation_summary.json` and `.txt` it was
+written with, recording every parameter the run was started with: the system, the
+nested sampling settings, the network, the learning rates and the full training
+protocol stage by stage. Together with the initial live set in
+`data/lj/<system>/samples_init.pt`, which all runs at a state point share, that is
+what is needed to launch the same run again. The results will not be identical ---
+nothing is seeded and GPU reductions are not deterministic --- but they are
+reproducible to the run-to-run spread, which the Supplementary Material quantifies
+from ten repetitions of the run of Figure 4f.
+
 `data/lj/K10000/L2.9/conditioning_efficiency/` holds the scans behind panels c and
 d of Figure 3: how well the flow generates below the energy bound it was trained
 at, for three training strategies, two of them at two window widths. Each of the

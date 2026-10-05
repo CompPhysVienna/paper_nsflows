@@ -1,0 +1,66 @@
+====================================================
+Simulation Summary
+====================================================
+
+Generated: 2026-09-27T20:13:43.815351
+
+SYSTEM
+------
+n_particles: 8
+dimensions: 2
+box_length: 3.3
+aspect_ratio: None
+cutin: 0.8
+rho: 0.7346189164370983
+device: cuda
+
+NESTED_SAMPLING
+---------------
+init_samples_filepath: /leonardo/home/userexternal/acoretti/Projects/NFsNestedSampling/nested_sampling_normalizing_flows/data/lj/conditioned/K10000/L3.3/samples_1000.pt
+init_U_max: 1270.56298828125
+live_samples: 10000
+max_ns_iterations: 500000
+n_propagate: 1000
+update_step: True
+turn_on_nf: 100
+alternate_std_ns_iters: 100
+n_pool: 20000
+load_nf_parameters: False
+itrain: 0
+reinitialize_nf_parameters: False
+cumulate_n_dataset: 3
+iprint: 1
+isavesamp: 500
+save_biased_pool: True
+
+NETWORK
+-------
+conditioned: True
+n_blocks: 28
+n_bins: 12
+circular_shifts: True
+n_parameters: 22984752
+
+LEARNING_RATES
+--------------
+start_lr: 1e-05
+mid_lr: 0.0001
+max_lr: 0.00025
+end_lr: 1e-06
+
+TRAINING PROTOCOL
+-----------------
+
+Stage 1
+~~~~~~~~~~~~
+w_xz: 1
+w_zx: 0
+batch_size: 1000
+conds_per_batch: -1
+total_steps: 250
+start_lr: 0.0001
+end_lr: 1e-06
+max_lr: None
+save_best: True
+optimizer: Adam
+scheduler: CosineAnnealingLR
