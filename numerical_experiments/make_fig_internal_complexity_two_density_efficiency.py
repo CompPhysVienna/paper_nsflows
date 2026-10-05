@@ -50,6 +50,30 @@ def fit(cols, y):
     return 10 ** pred, r2
 
 
+# The shaded band is the contiguous window around the efficiency minimum in which
+# eta stays within SHADE_FACTOR of that minimum: a stated rule, so the band can be
+# checked against the data rather than taken on trust.
+SHADE_FACTOR = 5.0
+
+
+def shade_window(x, att, e_is, pad):
+    """The band, in NS-progress percent, where eta is within SHADE_FACTOR of its minimum."""
+    xx = x - e_is
+    eff = 1.0 / att
+    left, right = xx.max() * pad, xx.min() / pad
+    span = np.log10(left) - np.log10(right)
+    pct = (np.log10(left) - np.log10(xx)) / span * 100.0
+    o = np.argsort(pct)
+    pct, eff = pct[o], eff[o]
+    inside = eff < SHADE_FACTOR * eff.min()
+    lo = hi = int(eff.argmin())
+    while lo > 0 and inside[lo - 1]:
+        lo -= 1
+    while hi < len(eff) - 1 and inside[hi + 1]:
+        hi += 1
+    return float(pct[lo]), float(pct[hi])
+
+
 def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
     # restrict to the full cumulation window (drop partial-window boundary
     # events, where M_k^cum is un-pooled and drift is undefined).
@@ -80,7 +104,9 @@ def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
     ax.set_yscale("log")
 
     # reference line at eta = 1e-2
-    ax.axhline(1e-2, color="0.5", ls="--", lw=0.8, zorder=1)
+    # Dotted, not dashed: the two model curves are the dashed lines, and this is a
+    # fixed reference level, not a fit.
+    ax.axhline(1e-2, color="0.5", ls=":", lw=1.0, zorder=1)
 
     # explicit, padded limits so the NS-progress mapping is exact at the edges.
     lo, hi = float(x.min()), float(x.max())
@@ -115,7 +141,8 @@ def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
         return 10.0 ** (np.log10(left) - np.asarray(p, float) / 100.0 * span)
 
     # shade a NS-progress window (mapped back to the energy axis).
-    p0, p1 = shade_pct
+    p0, p1 = shade_window(U, att, e_is, PAD)
+    print(f"   shaded band {p0:.0f}%-{p1:.0f}%  (eta within {SHADE_FACTOR:g}x of its minimum)")
     ax.axvspan(float(from_pct(p0)), float(from_pct(p1)),
                color="0.5", alpha=0.22, lw=0, zorder=0)
 
@@ -164,7 +191,7 @@ def main() -> None:
     *rb, secb = panel(
         axb, l33["Uev"], l33["M"], l33["Mcum"], l33["drift"], l33["attempts"],
         float(l33["e_is"]),
-        r"(b) $L = 3.3$  ($\rho\approx0.74$)",
+        r"(b) $L = 3.3$  ($\rho\approx0.73$)",
         l33["valid"], (25, 80))
 
     # only the shared (leftmost) y-axis needs its own label now

@@ -27,8 +27,10 @@ for key, label, marker, color in [("hex", r"$2:\sqrt{3}$, $N=9$", "^", "C0"),
     ax.plot(progress, 1 / attempts, marker, mfc="none", color=color, label=label)
     print(f"{key}: efficiency min {1 / attempts.max():.2e} at {progress[attempts.argmax()]:.0f}%, "
           f"last {1 / attempts[-1]:.2e}, first {1 / attempts[0]:.2e}")
-# Low-efficiency regime of the rectangular cell (cf. the grey bands of Fig. 5).
-ax.axvspan(25, 77, color="0.85", alpha=0.5, zorder=0, lw=0)
+# No grey band here. On the eta = 1e-2 criterion the rectangular cell is inside the
+# low-efficiency regime from 7% to 95% of the trajectory, so a band drawn on it would
+# cover the panel and hide the comparison; the dashed line marks the threshold and the
+# text quotes the two crossings.
 ax.axhline(1e-2, color="k", ls="--", lw=1.0, alpha=0.5)
 ax.set_yscale("log")
 ax.set_xlabel("Nested-Sampling Progress [%]")
