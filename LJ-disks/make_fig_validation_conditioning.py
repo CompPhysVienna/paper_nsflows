@@ -61,26 +61,58 @@ c_nf = 0.5 * (bins_nf[1:] + bins_nf[:-1])
 c_std = 0.5 * (bins_std[1:] + bins_std[:-1])
 
 # ---------------------------------------------------------------- panel c
-N_REP, N_LS = 10, 5
-SERIES = [                       # subdirectory, legend label
-    ("training_window_10K", "Unconditioned"),
-    ("training_window_10K_collated_dataset", "Unconditioned 3 Live Sets"),
-    ("conditioning_window_10K", "Conditioned 3 Live Sets"),
+N_REP, N_GEN, N_LS = 10, 10, 5
+TARGETS = [50000, 150000, 250000, 350000, 450000]
+
+# Colour is the training arm, hatching the separation between the live sets of the
+# window. The single-live-set arm has no window, so it appears once.
+SERIES = [                       # subdirectory, colour index, hatch
+    ("training_window_10K",               0, ""),
+    ("training_window_10K_step11000",     1, ""),
+    ("conditioning_window_10K_step11000", 2, ""),
+    ("training_window_10K_step24000",     1, "////"),
+    ("conditioning_window_10K_step24000", 2, "////"),
 ]
+ARM_LABELS = ["Unconditioned, 1 Live Set", "Unconditioned, 3 Live Sets",
+              "Conditioned, 3 Live Sets"]
+SPACING_LABELS = [r"$\Delta = 1.1\times10^4$ Iterations", r"$\Delta = 2.4\times10^4$"]
 
 
 def load(sub, name):
-    return np.loadtxt(os.path.join(COND, sub, f"{name}.txt"), usecols=(2, 3), unpack=True)
+    """Mean over the networks, and the standard deviation of the training alone.
+
+    Each of the N_REP networks was generated from N_GEN times, so the spread of the
+    network means still carries a share of the generation noise. The balanced one-way
+    decomposition removes it: MS_within estimates the generation variance and
+    (MS_between - MS_within) / N_GEN the training variance.
+    """
+    col = {"eff_generation": "eff", "RESS": "ress"}[name]
+    r = np.genfromtxt(os.path.join(COND, sub, "per_generation.txt"),
+                      names=["target", "rep", "gen", "seed", "eff", "ress", "eff_id"],
+                      dtype=None, encoding=None)
+    m, s = [], []
+    for t in TARGETS:
+        g = r[r["target"] == t]
+        x = np.array([g[g["rep"] == i][col][np.argsort(g[g["rep"] == i]["gen"])]
+                      for i in range(N_REP)])
+        per_network = x.mean(1)
+        ms_within = ((x - per_network[:, None]) ** 2).sum() / (N_REP * (N_GEN - 1))
+        ms_between = N_GEN * ((per_network - per_network.mean()) ** 2).sum() / (N_REP - 1)
+        m.append(per_network.mean())
+        s.append(np.sqrt(max((ms_between - ms_within) / N_GEN, 0.0)))
+    return np.array(m), np.array(s)
 
 
 # ---------------------------------------------------------------- figure
 fig_w, fig_h = ps.figsize_for_target_width(ps.NEURIPS_LINEWIDTH_IN, PRINT_SCALE, aspect=0.40)
 fig = plt.figure(figsize=(fig_w, fig_h), constrained_layout=True)
-gs = fig.add_gridspec(2, 3)
+# a and b get equal cells and a third of the width between them; c and d take the
+# rest, which they need now that they carry twenty-five bars.
+gs = fig.add_gridspec(2, 6, width_ratios=[1.367, 1.367, 1, 1, 1, 1])
 axa = fig.add_subplot(gs[:, 0])
 axb = fig.add_subplot(gs[:, 1], sharey=axa)   # a and b are the same energy axis
-axc = fig.add_subplot(gs[0, 2])
-axd = fig.add_subplot(gs[1, 2], sharex=axc)
+axc = fig.add_subplot(gs[0, 2:])
+axd = fig.add_subplot(gs[1, 2:], sharex=axc)
 
 # --- a) trace -----------------------------------------------------
 for x, y, color, ls, lab in ((it_std / 1e5, e_std, C_STD, "-", "Standard Nested Sampling"),
@@ -90,7 +122,9 @@ axa.set_ylabel(r"$U_{\max}-U_0$")
 axa.set_xlabel(r"Iteration ($\times10^5$)")
 axa.set_xticks([0, 5])
 
-ins = inset_axes(axa, width="50%", height="50%", loc="upper right", borderpad=0.6)
+# Axes.inset_axes, not the axes_grid1 helper: the latter sizes itself against the
+# pre-layout bbox and spills into b at this width.
+ins = axa.inset_axes([0.40, 0.54, 0.58, 0.42])
 ins.plot(it_std / 1e5, e_std, lw=1.0, color=C_STD)
 ins.plot(it_nf / 1e5, e_nf, lw=1.0, color=C_FLOW, ls=":")
 ins.set_yscale("log")
@@ -107,15 +141,17 @@ axb.tick_params(labelleft=False)
 
 # --- c, d) conditioning --------------------------------------------
 x = np.arange(N_LS)
-width = 0.27
-for k, (sub, lab) in enumerate(SERIES):
+width = 0.165
+for k, (sub, ci, hatch) in enumerate(SERIES):
     m_g, s_g = load(sub, "eff_generation")
     m_r, s_r = load(sub, "RESS")
-    off = (k - 1) * width
+    off = (k - (len(SERIES) - 1) / 2) * width
     for ax, m, e in ((axc, m_g, s_g), (axd, m_r, s_r)):
-        ax.bar(x + off, m, width * 0.92, yerr=e * np.sqrt(N_REP),
-               color=C_ARCH[k],
-               error_kw=dict(lw=0.8, capsize=1.5, ecolor="0.25"))
+        # The stored error is already the training standard deviation, so unlike the
+        # earlier single-network version it is not rescaled here.
+        ax.bar(x + off, m, width * 0.9, yerr=e, color=C_ARCH[ci], hatch=hatch,
+               edgecolor="white" if hatch else "none", linewidth=0.0,
+               error_kw=dict(lw=0.7, capsize=1.2, ecolor="0.25"))
 
 axc.set_ylabel("Generated Samples\n" r"with $U(x)<U_{\max}^{\mathrm{train}}$",
                fontsize=ps.ANNOTATION_FONTSIZE)
@@ -130,26 +166,45 @@ for ax in (axc, axd):
     ax.set_xlim(-0.5, N_LS - 0.5)
     ax.tick_params(axis="y", labelsize=ps.ANNOTATION_FONTSIZE)
 
-# --- one legend for the whole figure -------------------------------
-# Two columns: the samplers of a and b on the left, the architectures of c and d on
-# the right. matplotlib fills columns top to bottom and splits the handles evenly,
-# so an invisible third entry pads the left column to the height of the right one;
-# without it the first bar would wrap into the left column.
+# --- two legends, each over the panels it describes ----------------
+# One legend cannot do this: matplotlib's columnspacing is uniform, so there is no
+# way to put a wide gap between the samplers and the bars and a normal gap between
+# the three arms and the two spacings. Two figure legends can, each centred on its
+# own panels. An invisible third entry pads the sampler column to three rows so
+# that, bottom-anchored at a common baseline, its two lines align with the top row
+# of the bar block. The panel labels are set first, because the legends sit above
+# the tallest panel decoration and the titles are part of it.
+for ax, tag in zip((axa, axb, axc, axd), "abcd"):
+    ax.set_title(f"{tag})", loc="left", fontweight="bold")
+
 pad = Line2D([], [], ls="none", label="")
-legend_handles = [
+line_handles = [
     Line2D([], [], color=C_STD, ls="-", lw=ps.LW, label="Standard Nested Sampling"),
     Line2D([], [], color=C_FLOW, ls=":", lw=ps.LW, label="Flow-Based Nested Sampling"),
     pad,
-    *[Patch(facecolor=C_ARCH[k], label=lab) for k, (_, lab) in enumerate(SERIES)],
 ]
-# Right-aligned rather than centred, so that the bar column sits over panels c and d;
-# the column gap is then tuned so that the line column sits over a and b. Measured
-# centres: bars 0.852 against a c/d centre of 0.857, lines 0.359 against 0.359.
-fig.legend(handles=legend_handles, loc="lower right", bbox_to_anchor=(1.0, 1.00),
-           ncol=2, frameon=False, columnspacing=13.0)
+bar_handles = [
+    *[Patch(facecolor=C_ARCH[k], label=ARM_LABELS[k]) for k in range(3)],
+    Patch(facecolor="0.72", label=SPACING_LABELS[0]),
+    Patch(facecolor="0.72", hatch="////", edgecolor="white", linewidth=0.0,
+          label=SPACING_LABELS[1]),
+]
 
-for ax, tag in zip((axa, axb, axc, axd), "abcd"):
-    ax.set_title(f"{tag})", loc="left", fontweight="bold")
+fig.canvas.draw()
+renderer = fig.canvas.get_renderer()
+to_fig = fig.transFigure.inverted()
+pa, pb, pc = (ax.get_position() for ax in (axa, axb, axc))
+y_top = max(to_fig.transform((0, ax.get_tightbbox(renderer).y1))[1]
+            for ax in (axa, axb, axc))
+fig.set_layout_engine("none")
+
+fig.legend(handles=line_handles, loc="lower center",
+           bbox_to_anchor=(0.5 * (pa.x0 + pb.x1), y_top + 0.01), ncol=1, frameon=False,
+           fontsize=ps.ANNOTATION_FONTSIZE, handlelength=1.5, labelspacing=0.35)
+fig.legend(handles=bar_handles, loc="lower center",
+           bbox_to_anchor=(0.5 * (pc.x0 + pc.x1), y_top + 0.01), ncol=2, frameon=False,
+           fontsize=ps.ANNOTATION_FONTSIZE, handlelength=1.5, handleheight=1.0,
+           columnspacing=2.0, labelspacing=0.35)
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 ps.savefig_all(fig, OUT, print_scale=PRINT_SCALE)
