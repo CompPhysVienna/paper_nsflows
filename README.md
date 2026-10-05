@@ -33,8 +33,8 @@ result to within the run-to-run spread rather than exactly; the Supplementary
 Material measures that spread from ten repetitions of the run of Figure 4f, and
 it is 4.7% in total energy evaluations and 11.6% in generation attempts.
 
-The simulation output of the particular runs used in the paper, about 20 GB, is
-available from the authors on request. It is not needed for any of the above.
+The full simulation output of the particular runs used in the paper is available
+from the authors on request. It is not needed for any of the above.
 
 ## Requirements
 
