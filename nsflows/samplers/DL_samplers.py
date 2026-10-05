@@ -164,8 +164,10 @@ class nflows_propagator(base_sampler):
         
         print(f"\nLoading Parameters from file {params_path}")
 
-        # Load parameters from previous training
-        self.flow.load_state_dict(torch.load(params_path))
+        # Load parameters from previous training. map_location is needed because the
+        # checkpoint records the device its tensors were saved from: without it a file
+        # written on a GPU cannot be read back on a machine that has none.
+        self.flow.load_state_dict(torch.load(params_path, map_location=self.device))
         
         return
 
