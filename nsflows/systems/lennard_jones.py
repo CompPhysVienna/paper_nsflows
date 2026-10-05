@@ -113,6 +113,15 @@ class lennard_jones(base_system):
         self.tol = tol
         self.sqrt_tol = np.sqrt(tol)
 
+        # A pair is a self-pair when the two indices coincide, which is a property of
+        # the indices and not of the distance. Excluding the diagonal by distance
+        # instead would also exclude two *different* particles that happen to lie
+        # closer together than sqrt(tol), and those carry the largest interaction in
+        # the system, not the smallest. Shaped to broadcast against (B, N, N, 1).
+        self.distinct_pairs = ~torch.eye(self.n_particles, dtype=torch.bool,
+                                         device=self.device).view(1, self.n_particles,
+                                                                  self.n_particles, 1)
+
         # Set initial condition to None
         self.x0 = None
 
@@ -145,7 +154,7 @@ class lennard_jones(base_system):
         lj_energy = 4 * self.epsilon * ( (self.sigma)**(12)/r12 - (self.sigma)**(6)/r6 ) - self.ecutoff
 
         # Evaluate condition for applying cutoff and avoiding self interactions
-        cond_cutoff = (r2 < self.cutoff_sq) & (r2 > self.tol)
+        cond_cutoff = (r2 < self.cutoff_sq) & self.distinct_pairs
         # Compute partial energies and zero when outside cutoff and when same particle 
         e_part = torch.where(cond_cutoff, lj_energy, torch.zeros(lj_energy.shape, device=self.device)) 
 
@@ -155,7 +164,7 @@ class lennard_jones(base_system):
             r = torch.sqrt(r2)
             lin_energy = self.slope * (r - self.cutin) + self.ecutin
             # Evaluate condition for applying linear term and avoiding self interactions
-            cond_cutin = (r < self.cutin) & (r > self.sqrt_tol)
+            cond_cutin = (r < self.cutin) & self.distinct_pairs
             # Evaluate partial energy
             e_part = torch.where(cond_cutin, lin_energy, e_part) 
 
