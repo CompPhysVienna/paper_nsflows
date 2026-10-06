@@ -41,10 +41,21 @@ for ax, (key, label, color) in zip(axes, runs):
 
     flow_picks = acc[is_flow]
     per_pool = np.split(flow_picks, np.where(np.diff(np.flatnonzero(is_flow)) > 1)[0] + 1)
+
+    # The last pool of a run is never exhausted (the trajectory ends first), so it is
+    # shorter and less fully drawn than the rest. Averaging it in biases both the pool
+    # lifetime t* and the draw rate downwards, and breaks the identity mean picks =
+    # P/t*, which holds exactly over a pool that is drawn to the end. The SM quotes the
+    # exhausted-pool figures; the all-pool ones are printed alongside for comparison.
+    exhausted = per_pool[:-1] if len(per_pool) > 1 else per_pool
+    drawn = np.concatenate(exhausted)
     print(f"Run {key} (pool {label}): max picks {flow_picks.max():.0f}, "
-          f"mean picks {flow_picks.mean():.3f}, fraction of iterations with >1 pick "
-          f"{(flow_picks > 1).mean():.3f}, NS iterations per pool {np.mean([len(p) for p in per_pool]):.0f}, "
-          f"pools {len(per_pool)}")
+          f"fraction of iterations with >1 pick {(flow_picks > 1).mean():.3f}, "
+          f"pools {len(per_pool)} ({len(exhausted)} exhausted)\n"
+          f"    exhausted pools only: mean picks (= P/t*) {drawn.mean():.3f}, "
+          f"NS iterations per pool {np.mean([len(p) for p in exhausted]):.0f}\n"
+          f"    all pools:            mean picks {flow_picks.mean():.3f}, "
+          f"NS iterations per pool {np.mean([len(p) for p in per_pool]):.0f}")
 
 axes[-1].set_xlabel(r"NS Iteration ($\times 10^5$)")
 fig.supylabel("Pool Draws per Iteration", fontsize=ps.AXES_LABELSIZE)
