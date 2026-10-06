@@ -11,7 +11,7 @@
         "device": "cuda"
     },
     "nested_sampling": {
-        "init_samples_filepath": "/leonardo/home/userexternal/acoretti/Projects/NFsNestedSampling/nested_sampling_normalizing_flows/data/lj/conditioned/K10000/L2.9/samples_1000.pt",
+        "init_samples_filepath": "data/lj/K10000/L2.9/samples_init.pt",
         "init_U_max": 2540.8984375,
         "live_samples": 10000,
         "max_ns_iterations": 500000,
