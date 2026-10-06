@@ -35,6 +35,14 @@ def read_output(run):
     ``acc`` is the MC acceptance during standard-NS iterations, and the number of
     pool draws needed to find a configuration below the bound during flow iterations
     (the latter are the rows with a sixth column).
+
+    The sixth column is the pool size, and it is ``None`` on exactly one row per
+    dilution stage: the sampler turns the flow back on at the end of the last
+    standard-NS iteration of the stage, before that iteration is written out, so the
+    row is written in the flow format while no pool exists yet. Those rows are
+    standard-NS iterations -- their ``acc`` is an MC acceptance, not a draw count --
+    and counting them as flow iterations loses one iteration per stage from the
+    energy budget.
     """
     it, acc, umax, is_flow = [], [], [], []
     with _open_text(Path(run) / "output.txt") as f:
@@ -43,7 +51,7 @@ def read_output(run):
             it.append(int(s[0]))
             acc.append(float(s[2]))
             umax.append(float(s[3]))
-            is_flow.append(len(s) == 6)
+            is_flow.append(len(s) == 6 and s[5] != "None")
     return np.array(it), np.array(acc), np.array(umax), np.array(is_flow)
 
 
