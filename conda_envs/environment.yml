@@ -32,4 +32,5 @@ dependencies:
   - einops>=0.7
   - tqdm>=4.66
   - ipykernel>=6.29       # to run the notebooks
+  - pytest>=8             # to run the test suite
   - pip

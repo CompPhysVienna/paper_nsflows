@@ -409,9 +409,11 @@ notebook that produced that run.
 wrong number still comes out, only a different one.
 
 ```bash
-pip install pytest
 pytest
 ```
+
+`pytest` is included in both environment specifications under `conda_envs/`.
+Installing from `pyproject.toml` instead, add it with `pip install -e .[test]`.
 
 Twenty-seven tests, about a second, no GPU and no data beyond what the package
 builds itself. They assert that the training window holds distinct live sets
