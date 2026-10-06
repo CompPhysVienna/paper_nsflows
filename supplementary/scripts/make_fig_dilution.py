@@ -72,7 +72,7 @@ def main(simulate=False):
                  label=rf"$n \geq {n}$")
     axa.axhline(0.99, color="k", ls=":", lw=0.8)
     axa.axvline(M_RUN, color="k", lw=0.8, alpha=0.6)
-    axa.annotate(rf"$\mathscr{{M}}={M_RUN}$", xy=(M_RUN, 0.06), xytext=(M_RUN + 8, 0.06),
+    axa.annotate(rf"$\mathscr{{M}}={M_RUN}$", xy=(M_RUN, 0.06), xytext=(M_RUN -35, 0.80),
                  fontsize=ps.ANNOTATION_FONTSIZE)
     axa.set_xlabel(r"Dilution Steps $\mathscr{M}$")
     axa.set_ylabel("Probability All Walkers Refreshed")
