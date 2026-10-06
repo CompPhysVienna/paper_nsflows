@@ -182,14 +182,16 @@ LJ_disks = lennard_jones(n_particles=n_particles, dimensions=dimensions, rho=rho
 def load_config(count, as_numpy=True):
 
     # load configurations
+    # map_location: the shipped .pt files were written on a CUDA machine, so loading
+    # them on a CPU- or MPS-only machine needs an explicit target.
     config = torch.load(
-        os.path.join(input_dir, "samples_ref.pt")
+        os.path.join(input_dir, "samples_ref.pt"), map_location=device
     ).view(-1, n_particles, dimensions)
 
     if as_numpy:
         config = config.cpu().numpy()
 
-    umax = torch.load(os.path.join(input_dir, "U_max_ref.pt"))
+    umax = torch.load(os.path.join(input_dir, "U_max_ref.pt"), map_location=device)
 
     return config, umax.item()
 

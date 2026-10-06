@@ -352,7 +352,8 @@ for ax, run_dir, run_label, panel_label in zip(
 
         if os.path.exists(fname):
 
-            c = torch.load(fname)
+            # map_location: the shipped .pt files were written on a CUDA machine.
+            c = torch.load(fname, map_location="cpu")
 
             if torch.is_tensor(c):
                 conds.append(float(c.squeeze()))

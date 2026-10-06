@@ -1,12 +1,8 @@
-"""Figure 2 built from run f (CA, P=2e4) instead of run a.
+"""Figure 2: live sets, generated pools and resampled pools along the NS trajectory.
 
-Run a is still on the cluster. Every run now writes pool_biased_*, so any of
-them can drive this figure. The four rows are the pools of run f whose energy
-bounds are closest to those of run a's published rows 2, 7, 12 and 20:
-    a:  530.655   16.768   -11.302   -14.745
-    f:  573.784   17.148   -11.418   -14.739
-The alignment reference stays the standard-NS final live set, which no rerun
-touches.
+Built from run a (1C+CA, P=1e5), the run of Fig. 4a and of the first row of
+Table S3. The four rows are its pools 2, 7, 12 and 20. The alignment reference
+is the final live set of the standard-NS run.
 
 Extracted from plot_ljdisks_results.ipynb cells 0, 1, 3, 5 and 7.
 """
@@ -345,10 +341,13 @@ for row, count in enumerate(counts):
     # Load data
     # --------------------------------------------------------
 
-    dataset = torch.load(dataset_filepath)
-    pool_biased = torch.load(pool_biased_filepath)
-    pool = torch.load(pool_filepath)
-    cond = torch.load(conds_filepath)
+    # map_location: the shipped .pt files were written on a CUDA machine, so loading
+    # them on a CPU- or MPS-only machine needs an explicit target. Mapping to the
+    # device selected above also keeps them on the same device as the system objects.
+    dataset = torch.load(dataset_filepath, map_location=device)
+    pool_biased = torch.load(pool_biased_filepath, map_location=device)
+    pool = torch.load(pool_filepath, map_location=device)
+    cond = torch.load(conds_filepath, map_location=device)
 
     r_dataset, g_dataset = rdf(
         dataset,
@@ -420,12 +419,9 @@ for row, count in enumerate(counts):
     # ------------------------------------------------------------
     # Load reference configuration for alignment
     # ------------------------------------------------------------
-    reference_path = os.path.join(
-    "/home/acoretti/Documents/Projects/NestedSampling/paper_nsflows/data/lj/K10000/L2.9",
-    "samples_ref.pt"
-    )
+    reference_path = _os.path.join(_DATA, "K10000", "L2.9", "samples_ref.pt")
 
-    reference_config = torch.load(reference_path)
+    reference_config = torch.load(reference_path, map_location=device)
 
     reference_config = reference_config.view(
         -1,
