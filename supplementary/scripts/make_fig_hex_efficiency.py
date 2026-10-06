@@ -8,33 +8,118 @@ b) time spent training the flow and generating each pool in the rectangular cell
 """
 
 import numpy as np
+import torch
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, FuncFormatter
 
 import common as cm
 from common import ps
+from nsflows.systems.lennard_jones import lennard_jones
 
 ps.set_style()
+
+# Panel a) uses the axes of Fig. 5: reduced energy U - U_0 on a reversed log abscissa
+# (high energy left, basin right) with nested-sampling progress on top, so the two
+# figures can be read against each other. PAD puts 0% and 100% exactly at the edges.
+PAD = 1.15
+
+# Same criterion as Fig. 5: the low-efficiency regime is the contiguous window around the
+# efficiency minimum in which eta stays within SHADE_FACTOR of that minimum.
+SHADE_FACTOR = 5.0
+
+# Cells of the two runs, for the U_0 of each. U_0 is the inherent-structure proxy used in
+# Fig. 5: the lowest live-point energy of the final live set (see internal_complexity.py).
+CELLS = {"hex": (9, 2.864, 3.307), "f": (8, 2.9, 2.9)}
+
+
+def u_zero(key):
+    n, lx, ly = CELLS[key]
+    last = cm.load(cm.run_dir(key) / "samples_000000500000.pt")
+    last = torch.as_tensor(last).float().reshape(-1, n, 2)
+    system = lennard_jones(n_particles=n, dimensions=2, rho=n / (lx * ly),
+                           device=torch.device("cpu"), cutin=0.8, lrc=True,
+                           aspect_ratio=None if lx == ly else ly / lx)
+    with torch.no_grad():
+        return float(system.energy(last).numpy().min())
+
+
+def thresholds(key, n_pools):
+    """Training threshold U_max of each pool, in pool order."""
+    return np.array([cm.load(cm.run_dir(key) / f"conds_{i:04d}.pt").item()
+                     for i in range(n_pools)])
+
 
 # Printed at \linewidth under the paper's shared PRINT_SCALE.
 fig_w, fig_h = ps.figsize_for_target_width(ps.NEURIPS_LINEWIDTH_IN, ps.PRINT_SCALE, aspect=0.39)
 fig, axes = plt.subplots(1, 2, figsize=(fig_w, fig_h), constrained_layout=True)
 
 ax = axes[0]
+series = []
 for key, label, marker, color in [("hex", r"$2:\sqrt{3}$, $N=9$", "^", "C0"),
                                   ("f", r"$1:1$, $N=8$", "o", "C1")]:
     attempts, _ = cm.generation_attempts(cm.run_dir(key))
-    progress = 100 * np.arange(len(attempts)) / (len(attempts) - 1)
-    ax.plot(progress, 1 / attempts, marker, mfc="none", color=color, label=label)
-    print(f"{key}: efficiency min {1 / attempts.max():.2e} at {progress[attempts.argmax()]:.0f}%, "
-          f"last {1 / attempts[-1]:.2e}, first {1 / attempts[0]:.2e}")
-# No grey band here. On the eta = 1e-2 criterion the rectangular cell is inside the
-# low-efficiency regime from 7% to 95% of the trajectory, so a band drawn on it would
-# cover the panel and hide the comparison; the dashed line marks the threshold and the
-# text quotes the two crossings.
-ax.axhline(1e-2, color="k", ls="--", lw=1.0, alpha=0.5)
+    x = thresholds(key, len(attempts)) - u_zero(key)
+    series.append((key, x, 1 / attempts))
+    ax.plot(x, 1 / attempts, marker, mfc="none", color=color, label=label, zorder=3)
+
+ax.set_xscale("log")
 ax.set_yscale("log")
-ax.set_xlabel("Nested-Sampling Progress [%]")
+
+# Anchored on the square-box run, exactly as Fig. 5a is, so the progress axis of the two
+# figures is one and the same scale. The rectangular cell fits inside it on both sides
+# (its 2861 < 2890 and its 0.476 > 0.122), so nothing is clipped.
+anchor = dict((k, x) for k, x, _ in series)["f"]
+left, right = anchor.max() * PAD, anchor.min() / PAD
+ax.set_xlim(left, right)
+span = np.log10(left) - np.log10(right)
+
+
+def to_pct(xv):
+    xv = np.clip(np.asarray(xv, float), 1e-300, None)
+    return (np.log10(left) - np.log10(xv)) / span * 100.0
+
+
+def from_pct(p):
+    return 10.0 ** (np.log10(left) - np.asarray(p, float) / 100.0 * span)
+
+
+for key, x, eff in series:
+    pct = to_pct(x)
+    order = np.argsort(pct)
+    p, e = pct[order], eff[order]
+    inside = e < SHADE_FACTOR * e.min()
+    lo = hi = int(e.argmin())
+    while lo > 0 and inside[lo - 1]:
+        lo -= 1
+    while hi < len(e) - 1 and inside[hi + 1]:
+        hi += 1
+    print(f"{key}: efficiency min {eff.min():.2e} at {pct[eff.argmin()]:.0f}%, "
+          f"last {eff[-1]:.2e}, first {eff[0]:.2e}, U-U_0 from {x.max():.1f} to "
+          f"{x.min():.3f}, curve spans {p.min():.0f}%-{p.max():.0f}%, "
+          f"low-efficiency band {p[lo]:.0f}%-{p[hi]:.0f}% "
+          f"(eta within {SHADE_FACTOR:g}x of min)")
+    # Only the rectangular cell is shaded: it is the subject of this section, and the
+    # two bands overlap almost entirely, so drawing both would be unreadable.
+    if key == "hex":
+        ax.axvspan(float(from_pct(p[lo])), float(from_pct(p[hi])),
+                   color="0.5", alpha=0.22, lw=0, zorder=0)
+
+# Dotted grey, as in Fig. 5: a fixed reference level the two final plateaus are compared
+# against, not the band criterion.
+ax.axhline(1e-2, color="0.5", ls=":", lw=1.0, zorder=1)
+ax.set_xlabel(r"$U_{\max} - U_0$")
 ax.set_ylabel(r"Generative Efficiency $\eta$")
+secax = ax.secondary_xaxis("top", functions=(to_pct, from_pct))
+secax.set_xlabel("Nested-Sampling Progress [%]", fontsize=ps.ANNOTATION_FONTSIZE,
+                 labelpad=4)
+# The secondary axis inherits the parent's log locator, which lands dozens of decade
+# ticks on a 0-100 scale; fix them at the same decades Fig. 5 uses.
+secax.minorticks_off()
+secax.xaxis.set_major_locator(FixedLocator([0, 20, 40, 60, 80, 100]))
+secax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0f}"))
+secax.tick_params(labelsize=ps.ANNOTATION_FONTSIZE_SMALL, direction="in", length=4, pad=2)
+# Upper right: the curves occupy the lower left (low energy, recovered efficiency) and
+# the upper left (high energy, high efficiency), leaving this corner free.
 ax.legend(loc="upper right", handletextpad=0.2, fontsize=ps.ANNOTATION_FONTSIZE)
 
 # b) Same conventions as the timing mosaic of Fig. 4 (new_plotter.ipynb).
