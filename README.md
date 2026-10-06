@@ -154,12 +154,13 @@ the system the paper's results are for. The two state points are selected by the
 | [`LJ-disks/nsflows.ipynb`](LJ-disks/nsflows.ipynb) | Nested sampling with the flow |
 | [`LJ-disks/multiple_live_sets_conditioning.ipynb`](LJ-disks/multiple_live_sets_conditioning.ipynb) | Flow efficiency against the energy bound, conditioned on it |
 | [`LJ-disks/multiple_live_sets_training.ipynb`](LJ-disks/multiple_live_sets_training.ipynb) | The same, retraining at each live set instead |
+| [`LJ-disks/plot_ljdisks_results.ipynb`](LJ-disks/plot_ljdisks_results.ipynb) | Reads a finished run and plots it: the four figure scripts below were extracted from it |
 | [`LJ-disks/make_fig_pools_aligned.py`](LJ-disks/make_fig_pools_aligned.py) | Figure 2, from the data included here |
 | [`LJ-disks/make_fig_validation_conditioning.py`](LJ-disks/make_fig_validation_conditioning.py) | Figure 3, from the data included here |
 | [`LJ-disks/make_fig_timings.py`](LJ-disks/make_fig_timings.py) | Figure 4, from the data included here |
 | [`LJ-disks/make_fig_phase_diagram.py`](LJ-disks/make_fig_phase_diagram.py) | Figure 6, from the data included here |
 
-Only the last four are quick, and they write into `LJ-disks/figures/`. The others
+Only the four scripts are quick, and they write into `LJ-disks/figures/`. The others
 are full runs: the flow-based nested sampling took between 8 and 33 hours per run
 on a GPU, and the two efficiency scans take hours per live set. Reduce `max_ns_iterations`, or `live_sets` and
 `total_steps`, to see them work before committing to a full run.
