@@ -75,26 +75,29 @@ def shade_window(x, att, e_is, pad):
 
 
 def panel(ax, U, M, Mcum, drift, att, e_is, label, valid, shade_pct):
-    # restrict to the full cumulation window (drop partial-window boundary
-    # events, where M_k^cum is un-pooled and drift is undefined).
-    U, M, Mcum, drift, att = (a[valid] for a in (U, M, Mcum, drift, att))
+    # The two fits are restricted to the full cumulation window: for the first c-1
+    # pools M_k^cum is un-pooled and the drift undefined. The measured points, the
+    # axis limits and the band use every pool, so that the nested-sampling-progress
+    # axis spans the whole run and is the same scale as Fig. S4a.
     x = U - e_is
-    y = np.log10(att)                       # fit still done in attempts space
-    M = np.maximum(M, 1e-6)
-    Mcum = np.maximum(Mcum, 1e-6)
-    drift = np.maximum(drift, 1e-6)
-    pMc, r2Mc = fit([Mcum], y)
-    pMcd, r2Mcd = fit([Mcum, drift], y)
+    eff = 1.0 / att                         # efficiency of every pool
+    Uf, Mf, Mcumf, driftf, attf = (a[valid] for a in (U, M, Mcum, drift, att))
+    xf = Uf - e_is
+    y = np.log10(attf)                      # fit still done in attempts space
+    Mf = np.maximum(Mf, 1e-6)
+    Mcumf = np.maximum(Mcumf, 1e-6)
+    driftf = np.maximum(driftf, 1e-6)
+    pMc, r2Mc = fit([Mcumf], y)
+    pMcd, r2Mcd = fit([Mcumf, driftf], y)
 
-    # efficiency = 1 / attempts (invert measured points and both models)
-    eff = 1.0 / att
+    # invert both models onto the efficiency axis
     eMc, eMcd = 1.0 / pMc, 1.0 / pMcd
 
     # sort by energy for clean lines
-    o = np.argsort(-x)
-    ax.plot(x[o], eMc[o], "--", color=M_C, lw=1.4, alpha=0.85, zorder=2,
+    o = np.argsort(-xf)
+    ax.plot(xf[o], eMc[o], "--", color=M_C, lw=1.4, alpha=0.85, zorder=2,
             label=r"$M_k^{\mathrm{cum}}$")
-    ax.plot(x[o], eMcd[o], "--", color=MCD_C, lw=1.7, alpha=0.9, zorder=2,
+    ax.plot(xf[o], eMcd[o], "--", color=MCD_C, lw=1.7, alpha=0.9, zorder=2,
             label=r"$M_k^{\mathrm{cum}}+$Drift")
     ax.scatter(x, eff, marker="^", s=42, facecolors="none",
                edgecolors=ATT_C, linewidths=1.3, zorder=4,
