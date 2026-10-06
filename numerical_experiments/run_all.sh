@@ -38,9 +38,9 @@ run generate_data/internal_complexity.py   # -> generate_data/output/internal_co
 #              committed copies in ../data/numerical_experiments/; write to
 #              ./figures/) -------------------------------------------------
 run make_fig_landscapes.py --data-dir generate_data/output   # Figure 1
-run make_fig_concepts_internal_complexity.py             # Figure 8 (self-contained)
+run make_fig_concepts_internal_complexity.py             # Figure 7 (self-contained)
 
-run make_fig_internal_complexity_two_density_efficiency.py --data-dir generate_data/output  # Figure 6
+run make_fig_internal_complexity_two_density_efficiency.py --data-dir generate_data/output  # Figure 5
 
 
 echo; echo "Done. See generate_data/output/ for regenerated .npz data and ./figures/ for the figures."

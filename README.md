@@ -432,7 +432,7 @@ nsflows/
 ├── nested_sampling.py    # the nested sampling driver
 ├── network/              # normalizing flow: splines, coupling blocks, trainer
 ├── samplers/             # Monte Carlo and flow-based samplers
-├── systems/              # test systems: Gaussians, uniforms, Einstein crystal,
+├── systems/              # test systems: Gaussians, uniforms,
 │                         #   Lennard-Jones, 2D test systems
 ├── transformations/      # coordinate transformations and normalization
 └── tools/                # observables, plotting style, run readers and

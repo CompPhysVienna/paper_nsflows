@@ -8,7 +8,11 @@
 #
 #   conda env create -f conda_envs/environment.yml
 #   conda activate nsflows
-#   pip install -e .
+#   pip install -e . --no-deps
+#
+# --no-deps because conda has already solved the dependencies; without it pip would
+# reinstall them from the exact pins in pyproject.toml, which can replace the conda
+# PyTorch (GPU-enabled) with the plain CPU wheel from PyPI. See the README.
 #
 # By default this installs the CPU build of PyTorch. For the CUDA 11.8 build
 # used in the paper, uncomment the `pytorch-cuda` line below (linux-64/win-64

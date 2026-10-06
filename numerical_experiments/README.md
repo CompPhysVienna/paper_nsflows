@@ -1,6 +1,6 @@
 # Numerical experiments
 
-Code behind Figures 1, 6 and 8 of the manuscript (the figures not produced
+Code behind Figures 1, 5 and 7 of the manuscript (the figures not produced
 by the `2D-testsystems/` or `LJ-disks/` notebooks), together with the
 data-generation scripts that produced the `.npz` files shipped in
 `../data/numerical_experiments/`.

@@ -1,6 +1,7 @@
 """Internal mode complexity M_k, cumulated M_k^cum, D_eff, target drift and
 the (logged) generation attempts for one or more NS runs, written to
-output/internal_complexity_<label>.npz for make_fig_internal_complexity.py.
+output/internal_complexity_<label>.npz for
+make_fig_internal_complexity_two_density_efficiency.py.
 
 For each generation event the script reads the logged generation efficiency
 (attempts = 1/eff) and the energy threshold Umax, matches Umax to the nearest

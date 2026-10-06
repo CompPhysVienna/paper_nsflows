@@ -4,8 +4,8 @@ distributions along the NS trajectory for N = 9 disks in a 2:sqrt(3) cell (rho =
 Counterpart of Fig. 2 of the main text; the flow-generated pool before resampling was
 not stored for this run, so that column is absent.
 
-Needs the rectangular-cell version of nsflows (branch ``anisotropic_cell``), e.g.
-    git archive origin/anisotropic_cell nsflows | tar -x -C /some/dir
+The rectangular cell is supported on main (``lennard_jones(aspect_ratio=...)``);
+no separate branch is needed.
     PYTHONPATH=/some/dir python make_fig_hex_configs.py
 """
 
